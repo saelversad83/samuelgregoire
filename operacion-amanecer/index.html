@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Operación Amanecer: Haití</title>
+<meta name="description" content="Juego de acción en español: captura a los pandilleros, rescata civiles y devuelve la paz a Haití.">
+<meta name="theme-color" content="#0b1220">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Op. Amanecer">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root{--panel:rgba(8,20,36,.88);--line:rgba(125,200,255,.25)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#0b1220;color:#eaf3ff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+#c{position:fixed;inset:0;display:block}
+#hud{position:fixed;top:6px;left:6px;right:6px;display:none;gap:6px;flex-wrap:wrap;align-items:center;z-index:5;pointer-events:none}
+.st{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:5px 9px;font-size:12px;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.st b{font-size:14px}
+.hp{width:90px;height:9px;background:#1e293b;border-radius:5px;overflow:hidden}
+.hp i{display:block;height:100%;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);transition:width .2s}
+.ib{pointer-events:auto;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:#fff;border-radius:12px;font-size:16px;width:36px;height:32px;display:flex;align-items:center;justify-content:center}
+.ib.off{opacity:.4}
+#btns{margin-left:auto;display:flex;gap:6px}
+#fire{position:fixed;right:22px;bottom:30px;width:96px;height:96px;border-radius:50%;border:3px solid rgba(255,255,255,.7);background:radial-gradient(circle at 35% 30%,#fca5a5,#dc2626 60%,#7f1d1d);color:#fff;font-weight:900;font-size:13px;display:none;align-items:center;justify-content:center;flex-direction:column;z-index:6;box-shadow:0 6px 22px rgba(0,0,0,.5);touch-action:none}
+#fire span{font-size:30px;line-height:1}
+#fire.on{transform:scale(.93);filter:brightness(1.2)}
+#hint{position:fixed;left:16px;bottom:22px;font-size:12px;color:rgba(255,255,255,.6);z-index:4;display:none;pointer-events:none}
+.modal{position:fixed;inset:0;background:rgba(2,8,16,.72);display:flex;align-items:center;justify-content:center;z-index:20;padding:14px;backdrop-filter:blur(3px)}
+.card{background:linear-gradient(160deg,#0d2440,#081626);border:1px solid rgba(125,200,255,.3);border-radius:20px;padding:20px;max-width:520px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:pop .35s;text-align:center}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:none;opacity:1}}
+.card h1{margin:0 0 4px;font-size:30px;background:linear-gradient(90deg,#fbbf24,#f97316,#ef4444);-webkit-background-clip:text;background-clip:text;color:transparent}
+.card h2{margin:4px 0 8px;font-size:22px}
+.card p,.card li{font-size:14px;line-height:1.5;color:#cfe0f2}
+.card ul{text-align:left;padding-left:20px;margin:8px 0}
+.flag{height:8px;border-radius:4px;background:linear-gradient(90deg,#00209f 50%,#d21034 50%);margin:6px auto 12px;max-width:220px}
+.big{font-size:48px;margin:2px 0}
+.btn{border:0;border-radius:12px;padding:12px 22px;font-weight:800;font-size:16px;cursor:pointer;background:linear-gradient(#fbbf24,#d97706);color:#1a1200;box-shadow:0 3px 0 rgba(0,0,0,.35);font-family:inherit;margin:4px}
+.btn.b2{background:linear-gradient(#475569,#334155);color:#fff}
+.note{font-size:11.5px!important;color:#7f95ab!important}
+.obj{display:inline-block;background:#10243b;border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:3px;font-size:14px}
+#banner{position:fixed;left:50%;top:32%;transform:translate(-50%,-50%);z-index:15;font-size:26px;font-weight:900;padding:12px 24px;border-radius:16px;display:none;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.6);border:2px solid rgba(255,255,255,.6);white-space:nowrap}
+#radio{position:fixed;right:30px;bottom:140px;width:86px;height:60px;border-radius:16px;border:2px solid rgba(255,255,255,.65);background:linear-gradient(#22c55e,#14532d);color:#fff;font-weight:800;font-size:11px;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:6;box-shadow:0 6px 18px rgba(0,0,0,.5);cursor:pointer;touch-action:none}
+#radio span{font-size:22px;line-height:1.1}
+#radio .rb{position:absolute;top:-9px;right:-9px;background:#fbbf24;color:#1a1200;border-radius:999px;font-size:12px;min-width:22px;height:22px;display:flex;align-items:center;justify-content:center;padding:0 5px;border:2px solid #fff}
+@media (pointer:fine){#radio{bottom:30px}#board{bottom:104px!important}}
+#board{position:fixed;right:30px;bottom:212px;min-width:86px;height:52px;padding:0 10px;border-radius:16px;border:2px solid #fff;background:linear-gradient(#0ea5e9,#075985);color:#fff;font-weight:900;font-size:13px;display:none;align-items:center;justify-content:center;z-index:6;box-shadow:0 6px 18px rgba(0,0,0,.5);cursor:pointer;touch-action:none;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.07)}}
+.mi .ld{font-size:11px;color:#fca5a5}
+.rgrid,.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.rc,.dc{background:#10243b;border:2px solid var(--line);border-radius:14px;padding:10px 8px;color:#fff;cursor:pointer;font-family:inherit;text-align:center}
+.rc .i{font-size:28px;line-height:1.2}.rc b,.dc b{display:block;font-size:14px}.rc small,.dc small{display:block;font-size:11px;color:#9fb3c8;margin-top:2px;line-height:1.3}
+.rc:disabled{opacity:.45;cursor:default}
+.rc .s{font-size:12px;font-weight:800;margin-top:4px}
+.dc.sel{border-color:#fbbf24;box-shadow:0 0 0 3px rgba(251,191,36,.3)}
+.card h3{margin:12px 0 2px;font-size:15px;color:#93c5fd;text-align:left}
+.mi{display:flex;align-items:center;gap:8px;background:#10243b;border:1px solid var(--line);border-radius:12px;padding:10px;margin:5px 0;cursor:pointer;color:#fff;width:100%;font-family:inherit;font-size:14px;text-align:left}
+.mi:disabled{opacity:.4;cursor:default}
+.mi .stars{margin-left:auto;color:#fbbf24;white-space:nowrap}
+.mi small{display:block;color:#9fb3c8;font-size:11px}
+@media (max-width:480px){.st{padding:4px 7px;font-size:11px}.st b{font-size:13px}.hp{width:64px}#banner{font-size:20px}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div class="st">📍 <b id="hLvl">Cité Soleil</b></div>
+  <div class="st">❤️ <div class="hp"><i id="hHp"></i></div></div>
+  <div class="st" id="hObj"></div>
+  <div class="st">⭐ <b id="hSc">0</b></div>
+  <div id="btns"><button class="ib" id="bMus">🎵</button><button class="ib" id="bFx">🔊</button><button class="ib" id="bPause">⏸️</button></div>
+</div>
+<div id="fire"><span>🎯</span>DISPARAR</div>
+<div id="board"></div>
+<div id="radio"><span>📻</span>REFUERZOS<div class="rb" id="rbN">0</div></div>
+<div id="hint">Toca y arrastra para moverte</div>
+<div id="banner"></div>
+<div id="modal"></div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rand=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const WS=1800,BK=300,RD=96;
+
+/* ================= AUDIO ================= */
+const Snd={ctx:null,musicOn:true,fxOn:true,step:0,next:0,intense:false};
+function audioInit(){
+ if(Snd.ctx){try{Snd.ctx.resume()}catch(e){}return}
+ const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+ const c=Snd.ctx=new AC();
+ Snd.master=c.createGain();Snd.master.gain.value=.9;Snd.master.connect(c.destination);
+ Snd.mus=c.createGain();Snd.mus.gain.value=.2;Snd.mus.connect(Snd.master);
+ Snd.fx=c.createGain();Snd.fx.gain.value=.6;Snd.fx.connect(Snd.master);
+ Snd.bassF=c.createBiquadFilter();Snd.bassF.type='lowpass';Snd.bassF.frequency.value=500;Snd.bassF.connect(Snd.mus);
+ const b=c.createBuffer(1,c.sampleRate,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;Snd.noise=b;
+ Snd.next=c.currentTime+.1;setInterval(sched,25);
+}
+function env(g,t,a,p,d){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(p,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+d)}
+function osc(type,f,t,dur,vol,dest,f2){const c=Snd.ctx,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);env(g,t,.006,vol,dur);o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+.05)}
+function noise(t,dur,vol,dest,type,freq){const c=Snd.ctx,s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();s.buffer=Snd.noise;f.type=type;f.frequency.value=freq;env(g,t,.004,vol,dur);s.connect(f);f.connect(g);g.connect(dest);s.start(t,Math.random()*.5);s.stop(t+dur+.05)}
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+const BPM=128,SD=60/BPM/4;
+const CH=[[50,53,57],[46,50,53],[48,52,55],[45,49,52]];
+function sched(){const c=Snd.ctx;while(Snd.next<c.currentTime+.15){mstep(Snd.step,Snd.next);Snd.next+=SD;Snd.step=(Snd.step+1)%64}}
+function mstep(s,t){
+ if(!Snd.musicOn||G.state!=='play')return;
+ const ch=CH[Math.floor(s/16)],k=s%16,M=Snd.mus;
+ if(k%4===0)osc('sine',150,t,.18,.9,M,42);
+ if(k===4||k===12){noise(t,.13,.32,M,'highpass',1700);osc('triangle',200,t,.07,.18,M,130)}
+ noise(t,.03,k%2?.05:.1,M,'highpass',7500);
+ if(k%2===0)osc('sawtooth',mtof(ch[0]-24+(k===10||k===14?12:0)),t,SD*1.4,.3,Snd.bassF);
+ const arp=[0,1,2,1,0,2,1,2];if(k%2===1||Snd.intense)osc('square',mtof(ch[arp[k%8]]+12),t,SD*.8,Snd.intense?.05:.035,M);
+ if(k===0&&s%32===0)osc('sawtooth',mtof(ch[2]+12),t,SD*6,.04,M);
+}
+function fx(fn){if(!Snd.ctx||!Snd.fxOn)return;fn(Snd.ctx.currentTime+.005)}
+const SFX={
+ shoot(){fx(t=>{osc('square',1200,t,.07,.06,Snd.fx,500);noise(t,.04,.08,Snd.fx,'highpass',3000)})},
+ eshoot(){fx(t=>noise(t,.08,.07,Snd.fx,'bandpass',900))},
+ hit(){fx(t=>osc('triangle',300,t,.06,.12,Snd.fx,150))},
+ capture(){fx(t=>{osc('square',523,t,.08,.1,Snd.fx);osc('square',784,t+.07,.08,.1,Snd.fx);osc('square',1047,t+.14,.15,.1,Snd.fx)})},
+ rescue(){fx(t=>[72,76,79,84].forEach((n,i)=>osc('triangle',mtof(n),t+i*.07,.22,.18,Snd.fx)))},
+ hurt(){fx(t=>{osc('sawtooth',180,t,.18,.2,Snd.fx,80);noise(t,.12,.15,Snd.fx,'lowpass',800)})},
+ bad(){fx(t=>{osc('square',300,t,.15,.12,Snd.fx);osc('square',220,t+.15,.25,.12,Snd.fx)})},
+ pickup(){fx(t=>{osc('sine',880,t,.08,.15,Snd.fx,1320);osc('sine',1320,t+.08,.12,.12,Snd.fx,1760)})},
+ boom(){fx(t=>{noise(t,.6,.5,Snd.fx,'lowpass',500);osc('sine',90,t,.5,.7,Snd.fx,30)})},
+ win(){fx(t=>[60,64,67,72,67,72,76,79].forEach((n,i)=>osc('square',mtof(n),t+i*.13,.28,.1,Snd.fx)))},
+ lose(){fx(t=>[64,62,60,55].forEach((n,i)=>osc('triangle',mtof(n),t+i*.3,.5,.2,Snd.fx)))},
+ radio(){fx(t=>{noise(t,.25,.12,Snd.fx,'bandpass',1800);osc('sine',1500,t+.22,.07,.12,Snd.fx);osc('sine',1500,t+.33,.07,.12,Snd.fx)})},
+ ashoot(){fx(t=>{osc('square',900,t,.05,.03,Snd.fx,450)})},
+ mg(){fx(t=>noise(t,.05,.12,Snd.fx,'bandpass',1400))},
+ rocket(){fx(t=>{noise(t,.5,.18,Snd.fx,'bandpass',600);osc('sawtooth',300,t,.5,.06,Snd.fx,90)})},
+ alarm(){fx(t=>{for(let i=0;i<3;i++){osc('sawtooth',660,t+i*.32,.15,.1,Snd.fx);osc('sawtooth',500,t+i*.32+.16,.15,.1,Snd.fx)}})}
+};
+let esVoice=null;
+function loadVoices(){if(!('speechSynthesis' in window))return;const v=speechSynthesis.getVoices();esVoice=v.find(x=>/^es[-_](419|MX|US|DO|CO|AR)/i.test(x.lang))||v.find(x=>/^es/i.test(x.lang))||null}
+if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+let lastSay=0;
+function say(t,force){if(!Snd.fxOn||!('speechSynthesis' in window))return;const now=performance.now();if(!force&&now-lastSay<3500)return;lastSay=now;
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=esVoice?esVoice.lang:'es-ES';if(esVoice)u.voice=esVoice;u.rate=1.08;speechSynthesis.speak(u)}catch(e){}}
+
+SFX.cannon=()=>fx(t=>{noise(t,.7,.7,Snd.fx,'lowpass',350);osc('sine',70,t,.6,.9,Snd.fx,25)});
+SFX.engine=()=>fx(t=>{osc('sawtooth',60,t,.6,.12,Snd.fx,120);noise(t,.5,.1,Snd.fx,'lowpass',400)});
+SFX.splash=()=>fx(t=>noise(t,.6,.35,Snd.fx,'bandpass',500));
+
+/* ================= MISIONES ================= */
+// lead: [nombre, icono, 1=en barco, color pañuelo]
+const LEVELS=[
+ {n:'Cité Soleil',t:'city',st:1,cap:8,res:4,max:4,fast:.05,barr:5,g:'#d9c59a',lead:['El Gallo','🐓',0,'#dc2626'],sub:'Las bandas tienen atrapadas a muchas familias.',b:'Agente, las bandas han tomado Cité Soleil. Capture a los pandilleros, rescate a las familias y neutralice a su líder, El Gallo.'},
+ {n:'Croix-des-Bouquets',t:'city',st:1,cap:10,res:5,max:5,fast:.1,barr:10,g:'#cdb98c',lead:['Mano Negra','🖐️',0,'#111827'],sub:'Barricadas en llamas bloquean las calles.',b:'Croix-des-Bouquets está llena de barricadas. Destrúyalas y atrape al líder, Mano Negra.'},
+ {n:'Bahía de Puerto Príncipe',t:'coast',st:1,cap:6,res:3,max:4,fast:.05,barr:3,boats:2,g:'#d6c49b',lead:['La Barracuda','🐟',1,'#0ea5e9'],sub:'Lanchas de las bandas atacan desde el mar.',b:'¡Ataque por mar en la bahía de Puerto Príncipe! Suba a la lancha de la patrulla marítima en el muelle y hunda las lanchas de La Barracuda.'},
+ {n:'Martissant',t:'city',st:1,cap:12,res:5,max:5,fast:.15,barr:8,g:'#d2bd90',lead:['El Toro','🐂',0,'#7c2d12'],sub:'Las bandas controlan la entrada sur de la capital.',b:'Martissant es la puerta sur de la capital. Libere la zona y capture a El Toro.'},
+ {n:'Penitenciaría Nacional',t:'prison',st:2,cap:0,res:0,max:5,fast:.1,barr:4,defend:60,g:'#cfc0a0',lead:['El Cuervo','🐦',0,'#1f2937'],sub:'Las bandas quieren liberar a sus jefes presos.',b:'El Cuervo dirige un asalto contra la Penitenciaría Nacional. Defienda la cárcel durante sesenta segundos y neutralice a El Cuervo cuando aparezca.'},
+ {n:'Ruta Nacional 1',t:'city',st:2,cap:14,res:6,max:6,fast:.4,barr:8,g:'#c7b07e',lead:['El Motorista','🏍️',0,'#ea580c'],sub:'Pandilleros en moto extorsionan a los camiones.',b:'Las bandas bloquean la Ruta Nacional uno. Cuidado con las motos de El Motorista.'},
+ {n:'Puerto de Saint-Marc',t:'coast',st:2,cap:8,res:4,max:5,fast:.1,barr:4,boats:4,g:'#d4c095',lead:['El Contrabandista','📦',1,'#a16207'],sub:'Contrabando de armas por mar.',b:'El Contrabandista recibe armas por mar en Saint-Marc. Hunda sus lanchas y capture su barco.'},
+ {n:'Arcahaie',t:'coast',st:2,cap:10,res:5,max:5,fast:.2,barr:6,boats:3,g:'#d8c8a0',lead:['La Serpiente','🐍',0,'#16a34a'],sub:'Ataques por tierra y mar a los pescadores.',b:'En Arcahaie, La Serpiente ataca a los pescadores por tierra y por mar. Proteja la costa.'},
+ {n:'Cárcel de Croix-des-Bouquets',t:'prison',st:3,cap:0,res:0,max:6,fast:.15,barr:6,defend:75,g:'#c9b48a',lead:['El Martillo','🔨',0,'#57534e'],sub:'Un asalto masivo contra la cárcel civil.',b:'El Martillo quiere derribar los muros de la cárcel de Croix-des-Bouquets. Resista setenta y cinco segundos.'},
+ {n:'Bel-Air',t:'city',st:3,cap:12,res:5,max:6,fast:.2,barr:8,g:'#d9c59a',lead:['El Escorpión','🦂',0,'#b91c1c'],sub:'El Escorpión domina el barrio.',b:'Bel Air está bajo el control de El Escorpión. Capture a sus hombres y él saldrá a enfrentarle.'},
+ {n:'Isla de la Gonâve',t:'coast',st:3,cap:10,res:5,max:5,fast:.15,barr:4,boats:5,g:'#dcc9a0',lead:['El Pulpo','🐙',1,'#7e22ce'],sub:'Las bandas usan la isla como base naval.',b:'El Pulpo usa la isla de la Gonâve como base naval. Destruya su flota.'},
+ {n:'Gonaïves',t:'city',st:3,cap:16,res:7,max:7,fast:.25,barr:10,g:'#cdb98c',lead:['El Zorro','🦊',0,'#c2410c'],sub:'La ciudad de la independencia necesita ayuda.',b:'Gonaïves, la ciudad de la independencia, necesita su ayuda. Atrape a El Zorro.'},
+ {n:'Valle del Artibonite',t:'city',st:4,cap:18,res:7,max:7,fast:.45,barr:8,g:'#c2ab78',lead:['El Halcón','🦅',0,'#92400e'],sub:'Los campesinos huyen de los ataques.',b:'En el Valle del Artibonite, El Halcón ataca a los campesinos. Proteja a las familias del campo.'},
+ {n:'Puerto de Cabo Haitiano',t:'coast',st:4,cap:10,res:4,max:6,fast:.2,barr:4,boats:5,g:'#d6c49b',lead:['Capitán Tiburón','🦈',1,'#0f172a'],sub:'El Capitán Tiburón comanda un barco pirata.',b:'El Capitán Tiburón ataca el puerto de Cabo Haitiano. Hunda sus lanchas y él aparecerá con su barco.'},
+ {n:'Prisión de Cabo Haitiano',t:'prison',st:4,cap:0,res:0,max:7,fast:.2,barr:6,defend:90,g:'#cfc0a0',lead:['El Fantasma','👻',0,'#e5e7eb'],sub:'Intento de fuga masiva.',b:'El Fantasma organiza una fuga en la prisión de Cabo Haitiano. Defienda los muros noventa segundos.'},
+ {n:'Costa de Jacmel',t:'coast',st:4,cap:14,res:6,max:6,fast:.25,barr:6,boats:6,g:'#dcc9a0',lead:['El Cocodrilo','🐊',1,'#15803d'],sub:'Desembarcos en la costa sur.',b:'El Cocodrilo desembarca hombres en la costa de Jacmel. Combata en tierra y en el mar.'},
+ {n:'Los Cayos',t:'coast',st:5,cap:16,res:7,max:7,fast:.3,barr:8,boats:7,g:'#d4c095',lead:['El Almirante Negro','⚓',1,'#1e1b4b'],sub:'Gran ofensiva por mar en el sur.',b:'El Almirante Negro lanza una gran ofensiva por mar en Los Cayos. Use la patrulla marítima y el buque de la Guardia Costera.'},
+ {n:'Mirebalais',t:'city',st:5,cap:20,res:8,max:8,fast:.35,barr:12,g:'#c7b07e',lead:['El Jaguar','🐆',0,'#ca8a04'],sub:'Las bandas toman la meseta central.',b:'El Jaguar avanza sobre Mirebalais. Deténgalo antes de que llegue a la meseta central.'},
+ {n:'Gran fuga: Penitenciaría',t:'prison',st:5,cap:0,res:0,max:8,fast:.3,barr:8,defend:120,g:'#cfc0a0',lead:['El Rey de la Fuga','👑',0,'#facc15'],sub:'El ataque final contra la cárcel.',b:'El Rey de la Fuga une a todas las bandas contra la Penitenciaría Nacional. Resista dos minutos. ¡No pueden escapar!'},
+ {n:'Puerto Príncipe: El Gran Lobo',t:'city',st:5,cap:14,res:6,max:8,fast:.3,barr:8,final:true,g:'#d4c095',lead:['El Gran Lobo','🐺',0,'#b91c1c'],sub:'El último cabecilla se esconde en el centro.',b:'Misión final en Puerto Príncipe. Capture a sus hombres y El Gran Lobo saldrá a enfrentarle. ¡Devuelva la paz a Haití!'}
+];
+const TICON={city:'🏙️',coast:'🌊',prison:'🔒'};
+const HOUSE=['#f472b6','#60a5fa','#fbbf24','#34d399','#f87171','#a78bfa','#fb923c','#2dd4bf','#facc15','#e879f9'];
+const ROOF=['#94a3b8','#b45309','#64748b','#0e7490','#9a3412','#a8a29e'];
+const SKIN=['#5b3a24','#6b4429','#4a2e1c','#7a4e2f','#3d2617'];
+const SHIRT=['#ef4444','#22c55e','#3b82f6','#eab308','#ec4899','#f97316','#14b8a6','#ffffff','#a855f7'];
+
+/* ================= DIFICULTAD Y REFUERZOS ================= */
+const DIFFS=[
+ {n:'Fácil',rank:'Recluta',icon:'🟢',desc:'Bandas débiles y refuerzos rápidos.',ehp:.7,edmg:.55,ecd:1.4,esp:.9,max:-1,cap:.75,cd:.6,score:.75},
+ {n:'Normal',rank:'Agente',icon:'🔵',desc:'La experiencia equilibrada.',ehp:1,edmg:1,ecd:1,esp:1,max:0,cap:1,cd:1,score:1},
+ {n:'Difícil',rank:'Comando',icon:'🟠',desc:'Más pandilleros y más resistentes.',ehp:1.3,edmg:1.35,ecd:.8,esp:1.1,max:2,cap:1.25,cd:1.3,score:1.5},
+ {n:'Experto',rank:'Élite',icon:'🔴',desc:'Solo para los mejores agentes.',ehp:1.6,edmg:1.7,ecd:.65,esp:1.2,max:4,cap:1.5,cd:1.6,score:2}];
+const G={state:'menu',lvl:0,score:0,shake:0,t:0,diff:1,rcd:{},rotorT:0,prisoners:0};
+let D=DIFFS[1];
+const curL=()=>{const L=LEVELS[G.lvl];return{...L,boats:L.boats||0,defend:L.defend||0,cap:L.cap?Math.max(4,Math.round(L.cap*D.cap)):0,max:Math.max(3,L.max+D.max)}};
+const REIN={
+ gsf:{short:'GSF',icon:'🛡️',desc:'3 soldados de la Fuerza de Supresión de Pandillas.',cd:30,count:3,hp:130,dmg:30,rate:.5,col:'#14532d',helm:'#16a34a',tag:'GSF',dur:40,say:'Aquí la GSF, Fuerza de Supresión de Pandillas. Vamos en camino, agente.'},
+ priv:{short:'Seguridad privada',icon:'🕶️',desc:'2 escoltas rápidos con mucha cadencia de fuego.',cd:24,count:2,hp:90,dmg:24,rate:.3,col:'#111827',helm:'#374151',tag:'SEG. PRIVADA',dur:35,say:'Equipo de seguridad privada desplegado.'},
+ usa:{short:'Unidad EE. UU.',icon:'🇺🇸',desc:'2 operadores antipandillas de élite.',cd:45,count:2,hp:160,dmg:55,rate:.4,col:'#a16207',helm:'#57534e',tag:'EE. UU.',dur:32,say:'Unidad especial antipandillas de Estados Unidos, en posición.'},
+ slv:{short:'Unidad El Salvador',icon:'🇸🇻',desc:'3 agentes expertos en operaciones antipandillas.',cd:45,count:3,hp:140,dmg:40,rate:.42,col:'#1e3a8a',helm:'#0f172a',tag:'EL SALVADOR',dur:32,say:'Unidad antipandillas de El Salvador, lista para operar.'},
+ colombia:{short:'Tanques de Colombia',icon:'🇨🇴',desc:'Un tanque blindado con cañón pesado, operado por Colombia.',cd:60,tank:true,hp:650,dmg:120,rate:1.6,dur:35,say:'Unidad de tanques de Colombia en camino. Blindaje listo para el combate.'},
+ patrol:{short:'Patrulla marítima',icon:'🚤',desc:'2 lanchas de la policía patrullan la costa.',cd:35,coast:true,count:2,boat:true,hp:220,dmg:35,rate:.3,dur:40,say:'Patrulla marítima de la policía en camino.'},
+ ship:{short:'Buque Guardia Costera',icon:'🚢',desc:'Buque armado que bombardea las lanchas enemigas.',cd:60,coast:true,ship:true,dur:30,say:'Buque de la Guardia Costera en posición. Abriendo fuego.'},
+ hatk:{short:'Helicóptero de ataque',icon:'🚁',desc:'Dispara desde el aire y lanza cohetes.',cd:55,heli:'atk',dur:16,say:'Helicóptero de ataque en camino. Mantengan a los civiles a salvo.'},
+ hres:{short:'Helicóptero de rescate',icon:'🚑',desc:'Te cura por completo y evacúa hasta 3 civiles.',cd:50,heli:'res',dur:24,say:'Helicóptero de rescate en camino.'}};
+let unlocked=1;try{unlocked=Math.max(1,+localStorage.getItem('oa_unlock20')||1)}catch(e){}
+
+/* ================= ESTADO ================= */
+let W=null,P=null,PBOAT=null,EN=[],BT=[],PB=[],EB=[],CV=[],PK=[],FXP=[],TX=[],AL=[],HE=[],RK=[],LN=[];
+let seedV=1;const srnd=()=>(seedV=(seedV*16807)%2147483647,(seedV-1)/2147483646);
+
+function genWorld(L){
+ seedV=1234+G.lvl*999;
+ const coast=L.t==='coast',prison=L.t==='prison';
+ const w={rects:[],houses:[],stalls:[],palms:[],parks:[],plazas:[],taps:[],barr:[],piers:[],cells:[],inmates:[],sea:coast,seaY:1300,prison:null,base:null};
+ const okArea=(x,y,m=30)=>!(coast&&y>1170)&&!(prison&&x>600-m&&x<1200+m&&y>600-m&&y<1200+m);
+ const baseB=coast?[0,3]:[0,5];
+ if(prison){const pr={x:630,y:630,w:540,h:540,hp:1000,max:1000};w.prison=pr;const T=18;
+  [[pr.x,pr.y,pr.w,T],[pr.x,pr.y,T,pr.h],[pr.x+pr.w-T,pr.y,T,pr.h],[pr.x,pr.y+pr.h-T,225,T],[pr.x+pr.w-225,pr.y+pr.h-T,225,T]].forEach(a=>w.rects.push({x:a[0],y:a[1],w:a[2],h:a[3],wall:true}));
+  [[690,690,170,110],[940,690,170,110],[690,870,110,150],[1000,870,110,150]].forEach(a=>{const c={x:a[0],y:a[1],w:a[2],h:a[3]};w.rects.push(c);w.cells.push(c)});
+  for(let i=0;i<12;i++)w.inmates.push({x:rand(830,970),y:rand(840,1110),a:rand(0,6),t:0,vx:0,vy:0,sk:pick(SKIN)})}
+ for(let bx=0;bx<6;bx++)for(let by=0;by<6;by++){
+  const x0=bx*BK+RD/2,y0=by*BK+RD/2,S=BK-RD,r=srnd();
+  if(coast&&by>=4)continue;
+  if(prison&&bx>=2&&bx<=3&&by>=2&&by<=3)continue;
+  if(bx===baseB[0]&&by===baseB[1]){const p={x:x0,y:y0,w:S,h:S,base:true};w.parks.push(p);w.base=p;continue}
+  if(r<.12){w.plazas.push({x:x0,y:y0,w:S,h:S});for(let i=0;i<4;i++){const st={x:x0+20+(i%2)*110,y:y0+30+Math.floor(i/2)*100,w:62,h:44,c:pick(HOUSE),c2:pick(HOUSE)};w.stalls.push(st);w.rects.push(st)}}
+  else if(r<.22){w.parks.push({x:x0,y:y0,w:S,h:S});for(let i=0;i<5;i++)w.palms.push({x:x0+25+srnd()*(S-50),y:y0+25+srnd()*(S-50),s:22+srnd()*12,a:srnd()*6})}
+  else{const half=S/2;for(let i=0;i<4;i++){if(srnd()<.12)continue;const hw=half-12-srnd()*20,hh=half-12-srnd()*20;
+   const h={x:x0+(i%2)*half+6+(i%2?half-12-hw:0),y:y0+Math.floor(i/2)*half+6+(i>1?half-12-hh:0),w:hw,h:hh,c:HOUSE[Math.floor(srnd()*HOUSE.length)],roof:ROOF[Math.floor(srnd()*ROOF.length)],tank:srnd()<.4};w.houses.push(h);w.rects.push(h)}
+   if(srnd()<.5)w.palms.push({x:x0+S/2,y:y0+S/2,s:20,a:srnd()*6})}}
+ if(coast){[450,1050,1560].forEach(px=>w.piers.push({x:px-22,y:w.seaY-12,w:44,h:250}));for(let i=0;i<14;i++)w.palms.push({x:60+i*125+srnd()*40,y:1262+srnd()*20,s:18+srnd()*8,a:srnd()*6})}
+ const bc={x:w.base.x+w.base.w/2,y:w.base.y+w.base.h/2};
+ for(let i=0;i<10;i++){const hor=srnd()<.5,k=1+Math.floor(srnd()*5),along=RD+srnd()*(WS-2*RD);
+  const t=hor?{x:along,y:k*BK+12,w:74,h:30}:{x:k*BK+12,y:along,w:30,h:74};t.c=pick(HOUSE);t.c2=pick(HOUSE);t.hor=hor;
+  if(Math.hypot(t.x-bc.x,t.y-bc.y)<300||!okArea(t.x,t.y,60)||!okArea(t.x+t.w,t.y+t.h,60))continue;w.taps.push(t);w.rects.push(t)}
+ for(let i=0;i<L.barr*2&&w.barr.length<L.barr;i++){const kx=1+Math.floor(srnd()*5),ky=1+Math.floor(srnd()*5),hor=srnd()<.5;const b={x:hor?kx*BK+BK/2:kx*BK,y:hor?ky*BK:ky*BK+BK/2,r:26,hp:70};
+  if(!okArea(b.x,b.y,40)||Math.hypot(b.x-bc.x,b.y-bc.y)<250)continue;
+  if(w.rects.some(r=>b.x+30>r.x&&b.x-30<r.x+r.w&&b.y+30>r.y&&b.y-30<r.y+r.h))continue;w.barr.push(b)}
+ return w;
+}
+function blocked(x,y,r){
+ if(x<r||y<r||x>WS-r||y>WS-r)return true;
+ if(W.sea&&y+r*.4>W.seaY){let ok=false;for(const p of W.piers)if(x>p.x+2&&x<p.x+p.w-2&&y<p.y+p.h)ok=true;if(!ok)return true}
+ for(const b of W.rects){if(x+r>b.x&&x-r<b.x+b.w&&y+r>b.y&&y-r<b.y+b.h){const nx=cl(x,b.x,b.x+b.w),ny=cl(y,b.y,b.y+b.h);if((x-nx)**2+(y-ny)**2<r*r)return true}}
+ for(const c of W.barr)if(c.hp>0&&(x-c.x)**2+(y-c.y)**2<(r+c.r)**2)return true;
+ return false;
+}
+function boatBlocked(x,y,r){if(!W.sea||x<r||x>WS-r||y>WS-r*.6||y-r<W.seaY+6)return true;for(const p of W.piers)if(x+r>p.x&&x-r<p.x+p.w&&y-r<p.y+p.h)return true;return false}
+function inRect(x,y){for(const b of W.rects)if(x>b.x&&x<b.x+b.w&&y>b.y&&y<b.y+b.h)return true;return false}
+function moveEnt(e,dx,dy,fn,r){fn=fn||blocked;r=r||e.r;let m=0;if(!fn(e.x+dx,e.y,r)){e.x+=dx;m++}if(!fn(e.x,e.y+dy,r)){e.y+=dy;m++}return m}
+function roadPoint(minD){for(let i=0;i<80;i++){const k=Math.floor(rand(0,7)),a=rand(40,WS-40),off=rand(-28,28);const p=Math.random()<.5?{x:cl(k*BK+off,30,WS-30),y:a}:{x:a,y:cl(k*BK+off,30,WS-30)};
+ if(!blocked(p.x,p.y,18)&&(!W.prison||!(p.x>620&&p.x<1180&&p.y>620&&p.y<1180))&&(!P||Math.hypot(p.x-P.x,p.y-P.y)>minD))return p}return{x:W.base.x+40,y:W.base.y+40}}
+function landPointNear(x,y,maxR){maxR=maxR||90;for(let R=25;R<=maxR;R+=15)for(let k=0;k<13;k++){const a=-Math.PI/2+(k%2?1:-1)*Math.ceil(k/2)*.45;const px=x+Math.cos(a)*R,py=y+Math.sin(a)*R;if(!blocked(px,py,16))return{x:px,y:py}}return null}
+const angLerp=(a,b,k)=>{let d=b-a;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;return a+d*Math.min(1,k)};
+
+function startLevel(){
+ const L=curL();W=genWorld(L);
+ P={x:W.base.x+W.base.w/2,y:W.base.y+W.base.h/2,r:16,hp:100,ang:-Math.PI/2,bang:Math.PI/2,cd:0,shield:0,triple:0,inv:0,inBoat:false};
+ PBOAT=W.sea?{x:W.piers[0].x+22,y:W.piers[0].y+W.piers[0].h+40,ang:Math.PI/2}:null;
+ EN=[];BT=[];PB=[];EB=[];CV=[];PK=[];FXP=[];TX=[];AL=[];HE=[];RK=[];LN=[];
+ Object.assign(G,{cap:0,res:0,boatsDown:0,boatsSp:0,defT:0,spawnT:1.5,boatT:5,boss:null,bossSpawned:false,lowSaid:false,prSaid:0,pickT:10,lvlTime:0,ctxB:'x',seaSaid:false});Snd.intense=false;
+ Object.keys(REIN).forEach(k=>G.rcd[k]=(k==='gsf'||k==='priv'||k==='patrol')?0:REIN[k].cd*D.cd*.35);
+ const nc=L.res?L.res+4:3;for(let i=0;i<nc;i++){const p=roadPoint(350);CV.push(mkCiv(p.x,p.y))}
+ for(let i=0;i<3;i++)spawnEnemy();
+ for(let i=0;i<3;i++){const p=roadPoint(300);PK.push({x:p.x,y:p.y,k:pick(['med','shield','triple'])})}
+ updHud(true);
+}
+function mkCiv(x,y){return{x,y,r:12,sh:pick(SHIRT),sk:pick(SKIN),basket:Math.random()<.35?pick(['#f59e0b','#84cc16','#ef4444']):null,kid:Math.random()<.25,vx:0,vy:0,t:0,flee:0,state:'idle',ang:rand(0,6)}}
+function spawnEnemy(isBoss){
+ let p=null;
+ if(isBoss){for(let i=0;i<60;i++){const a=rand(0,6.28),R=rand(360,480),q={x:P.x+Math.cos(a)*R,y:P.y+Math.sin(a)*R};if(!blocked(q.x,q.y,28)&&!(W.prison&&q.x>620&&q.x<1180&&q.y>620&&q.y<1180)){p=q;break}}if(!p)p=roadPoint(300)}
+ else p=roadPoint(520);
+ return spawnEnemyAt(p.x,p.y,isBoss);
+}
+function bossHp(L){return L.final?1800:500+L.st*220}
+function spawnEnemyAt(x,y,isBoss){
+ const L=curL();const fast=!isBoss&&Math.random()<L.fast;
+ const e={x,y,r:isBoss?26:15,max:isBoss?bossHp(L):fast?60:100,sp:isBoss?85:fast?190:95,fast,boss:!!isBoss,cd:rand(1,2.2)*D.ecd,ang:0,stuck:0,wx:0,wy:0,wt:0,
+  sh:isBoss?'#111827':pick(['#374151','#1f2937','#44403c','#3f3f46','#7c2d12']),band:isBoss?L.lead[3]:'#dc2626',sk:pick(SKIN),flash:0,cap:0,mcd:0,summon:6,ring:3,name:isBoss?L.lead[0]:'',icon:isBoss?L.lead[1]:''};
+ e.max=Math.round(e.max*D.ehp);e.hp=e.max;e.sp*=D.esp;EN.push(e);return e;
+}
+function spawnBoat(isBoss){
+ const L=curL();const x=isBoss?cl(P.x+rand(-250,250),150,WS-150):rand(150,WS-150);
+ const b={isBoat:true,x,y:WS-50,r:isBoss?40:24,max:Math.round((isBoss?bossHp(L)*1.1:200)*D.ehp),sp:(isBoss?75:140)*D.esp,state:isBoss?'fight':'in',tx:cl(x+rand(-200,200),120,WS-120),cd:rand(1.5,2.5)*D.ecd,hd:-Math.PI/2,ang:0,boss:!!isBoss,cap:false,sink:0,flash:0,summon:10,ring:3,name:isBoss?L.lead[0]:'',icon:isBoss?L.lead[1]:'',sk:pick(SKIN)};
+ b.hp=b.max;if(!isBoss)G.boatsSp++;BT.push(b);return b;
+}
+
+/* ================= EFECTOS ================= */
+function burst(x,y,cols,n,sp,sz){for(let i=0;i<n;i++){const a=rand(0,6.28),v=rand(sp*.3,sp);FXP.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:0,m:rand(.3,.8),c:pick(cols),s:rand(sz*.5,sz)})}}
+function wake(x,y,a){FXP.push({x:x-Math.cos(a)*24+rand(-5,5),y:y-Math.sin(a)*24+rand(-5,5),vx:rand(-8,8),vy:rand(-8,8),l:0,m:rand(.6,1),c:'rgba(255,255,255,.7)',s:rand(3,6)})}
+function ftext(x,y,t,c){TX.push({x,y,t,c,l:0})}
+function banner(t,bg){const b=$('#banner');b.textContent=t;b.style.background=bg||'rgba(37,99,235,.92)';b.style.display='block';b.style.animation='none';b.offsetHeight;b.style.animation='pop .35s';clearTimeout(banner.t);banner.t=setTimeout(()=>b.style.display='none',1700)}
+
+/* ================= ENTRADA ================= */
+const keys={};let joy=null,firing=false,mouse=null,useMouse=false;
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if(e.key===' ')firing=true;
+ if(e.key==='Escape'){if(G.state==='radio'){closeModal();G.state='play'}else togglePause()}
+ if(k==='p')togglePause();if(k==='e'&&G.state==='play')toggleBoat();
+ if(k==='r'){if(G.state==='play')openRadio();else if(G.state==='radio'){closeModal();G.state='play'}}
+ if(G.state==='play'&&e.key>='1'&&e.key<='9'){const rk=Object.keys(REIN)[+e.key-1];if(rk&&reinOk(rk))callRein(rk)}});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;if(e.key===' ')firing=false});
+const cv=$('#c'),ctx=cv.getContext('2d');let DPR=1;
+cv.addEventListener('pointerdown',e=>{audioInit();if(G.state!=='play')return;
+ if(e.pointerType==='mouse'){useMouse=true;mouse={x:e.clientX,y:e.clientY};firing=true;return}
+ if(!joy){joy={id:e.pointerId,bx:e.clientX,by:e.clientY,x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);$('#hint').style.display='none'}});
+cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){mouse={x:e.clientX,y:e.clientY};return}if(joy&&e.pointerId===joy.id){joy.x=e.clientX;joy.y=e.clientY}});
+const endP=e=>{if(e.pointerType==='mouse'){firing=false;return}if(joy&&e.pointerId===joy.id)joy=null};
+cv.addEventListener('pointerup',endP);cv.addEventListener('pointercancel',endP);
+const fb=$('#fire');
+fb.addEventListener('pointerdown',e=>{e.preventDefault();audioInit();firing=true;useMouse=false;fb.classList.add('on');fb.setPointerCapture(e.pointerId)});
+const fUp=()=>{firing=false;fb.classList.remove('on')};fb.addEventListener('pointerup',fUp);fb.addEventListener('pointercancel',fUp);
+$('#board').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();audioInit();toggleBoat()});
+
+/* ================= OBJETIVOS ================= */
+function targets(){const a=[];for(const e of EN)if(!e.cap)a.push(e);for(const b of BT)if(!b.cap)a.push(b);return a}
+function los(a,b){const d=Math.hypot(b.x-a.x,b.y-a.y),n=Math.ceil(d/18);for(let i=1;i<n;i++){const t=i/n;if(inRect(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t))return false}return true}
+function nearestEnemy(range,needLos,from){from=from||P;let b=null,bd=range;for(const e of targets()){const d=Math.hypot(e.x-from.x,e.y-from.y);if(d<bd&&(!needLos||los(from,e))){bd=d;b=e}}return b}
+function hitTarget(t,d){if(t.cap)return;t.hp-=d;t.flash=.1;if(t.hp<=0){t.isBoat?sinkBoat(t):captureEnemy(t)}}
+function captureEnemy(e){
+ if(e.cap)return;e.cap=.001;G.cap++;G.prisoners++;G.score+=e.boss?2000:100;SFX.capture();burst(e.x,e.y,['#60a5fa','#bfdbfe','#fff'],e.boss?60:20,e.boss?260:150,3);
+ ftext(e.x,e.y,e.boss?`¡${e.name.toUpperCase()} NEUTRALIZADO!`:'¡Capturado! → 🔒 cárcel',e.boss?'#fde047':'#93c5fd');
+ if(e.boss){G.shake=.6;say(`¡${e.name} ha sido neutralizado y va camino a la cárcel!`,true)}
+ else if(Math.random()<.3)say(pick(['¡Capturado!','¡Sospechoso detenido!','¡Uno más para la cárcel!']));
+ if(!e.boss&&Math.random()<.25)PK.push({x:e.x,y:e.y,k:pick(['med','shield','triple','aid'])});
+}
+function sinkBoat(b){if(b.cap)return;b.cap=true;b.sink=.001;SFX.boom();SFX.splash();G.shake=.3;burst(b.x,b.y,['#e0f2fe','#7dd3fc','#fff','#f97316'],40,200,6);
+ if(b.boss){G.cap++;G.prisoners++;G.score+=2500;ftext(b.x,b.y,`¡${b.name.toUpperCase()} NEUTRALIZADO!`,'#fde047');say(`¡El barco de ${b.name} ha sido detenido! ${b.name} va camino a la cárcel.`,true);G.shake=.6}
+ else{G.boatsDown++;G.cap+=2;G.prisoners+=2;G.score+=250;ftext(b.x,b.y,'¡Lancha neutralizada! Tripulación arrestada','#7dd3fc');if(Math.random()<.5)say('¡Lancha enemiga neutralizada!');const L=curL();if(G.boatsDown===L.boats)banner('✅ Flota enemiga neutralizada','rgba(2,132,199,.92)')}}
+function rescueCiv(c,heli){const L=curL();c.state='saved';c.sv=0;G.res++;G.score+=150;SFX.rescue();burst(c.x,c.y,['#86efac','#f9a8d4','#fde047'],22,140,3);ftext(c.x,c.y,heli?'¡Evacuado en helicóptero! +150':'¡Rescatado! +150','#86efac');say(pick(['¡Civil rescatado!','¡Gracias, agente!','¡Familia a salvo!']));if(G.res===L.res)banner('✅ Rescates completos','rgba(21,128,61,.92)')}
+function dmgBarr(c,d){if(c.hp<=0)return;c.hp-=d;if(c.hp<=0){SFX.boom();burst(c.x,c.y,['#1f2937','#f97316','#fde047','#6b7280'],40,220,6);ftext(c.x,c.y,'¡Barricada destruida! +50','#fde047');G.score+=50;G.shake=.3}}
+function hurt(d){if(P.inv>0)return;d*=D.edmg*(P.inBoat?.65:1);if(P.shield>0){burst(P.x,P.y,['#7dd3fc'],8,100,3);return}P.hp-=d;P.inv=.25;G.shake=.25;SFX.hurt();burst(P.x,P.y,['#fca5a5','#fff'],8,100,3);
+ if(P.hp<30&&!G.lowSaid){G.lowSaid=true;say('¡Salud baja! Busque un botiquín o pida el helicóptero de rescate.',true)}
+ if(P.hp<=0){P.hp=0;gameOver('hp')}}
+function hurtAlly(a,d){a.hp-=d*D.edmg*(a.tank?.5:1);burst(a.x,a.y,['#fca5a5'],5,80,2.5)}
+function eFire(src,ang,spd,spreads,off){spreads.forEach(s=>{const a=ang+s;EB.push({x:src.x+Math.cos(a)*off,y:src.y+Math.sin(a)*off,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,l:0})})}
+function bossAttack(e){
+ e.ring-=1;if(e.ring<=0){e.ring=4;for(let k=0;k<14;k++){const a=k/14*6.28+G.t;EB.push({x:e.x,y:e.y,vx:Math.cos(a)*200,vy:Math.sin(a)*200,l:0})}SFX.boom();e.cd=1.1*D.ecd}
+ else{eFire(e,e.ang,290,[-.2,0,.2],e.r+6);SFX.eshoot();e.cd=.7*D.ecd}
+ e.summon-=1;if(e.summon<=0){e.summon=8;if(e.isBoat)spawnBoat(false);else{spawnEnemy();spawnEnemy()}ftext(e.x,e.y,'¡Refuerzos de la banda!','#fca5a5')}}
+
+/* ================= BARCO DEL JUGADOR ================= */
+function boardState(){if(!W.sea||!PBOAT)return null;if(!P.inBoat)return Math.hypot(P.x-PBOAT.x,P.y-PBOAT.y)<75?'board':null;return landPointNear(P.x,P.y,90)?'land':null}
+function toggleBoat(){const c=boardState();
+ if(c==='board'){P.inBoat=true;P.x=PBOAT.x;P.y=PBOAT.y;P.bang=PBOAT.ang;SFX.engine();say('A bordo de la patrulla marítima.',true);ftext(P.x,P.y,'🚤 Patrulla marítima','#7dd3fc')}
+ else if(c==='land'){const lp=landPointNear(P.x,P.y,90);PBOAT.x=P.x;PBOAT.y=P.y;PBOAT.ang=P.bang;P.inBoat=false;P.x=lp.x;P.y=lp.y;SFX.pickup()}}
+
+/* ================= LÓGICA ================= */
+function update(dt){
+ const L=curL();G.lvlTime+=dt;
+ let mx=0,my=0;
+ if(keys['w']||keys['arrowup'])my-=1;if(keys['s']||keys['arrowdown'])my+=1;if(keys['a']||keys['arrowleft'])mx-=1;if(keys['d']||keys['arrowright'])mx+=1;
+ if(joy){const dx=joy.x-joy.bx,dy=joy.y-joy.by,d=Math.hypot(dx,dy);if(d>6){const k=Math.min(1,d/55);mx=dx/d*k;my=dy/d*k}}
+ const ml=Math.hypot(mx,my);if(ml>1){mx/=ml;my/=ml}
+ if(P.inBoat){moveEnt(P,mx*290*dt,my*290*dt,boatBlocked,22);if(ml>.1){P.bang=angLerp(P.bang,Math.atan2(my,mx),dt*6);if(Math.random()<dt*25)wake(P.x,P.y,P.bang)}PBOAT.x=P.x;PBOAT.y=P.y;PBOAT.ang=P.bang}
+ else moveEnt(P,mx*230*dt,my*230*dt);
+ let aim=null;
+ if(useMouse&&mouse)aim=Math.atan2(mouse.y/Z+cam.y-P.y,mouse.x/Z+cam.x-P.x);
+ else{const t=nearestEnemy(P.inBoat?520:480,!P.inBoat);if(t)aim=Math.atan2(t.y-P.y,t.x-P.x);else if(ml>.1)aim=Math.atan2(my,mx)}
+ if(aim!==null)P.ang=aim;else if(ml>.1)P.ang=Math.atan2(my,mx);
+ P.cd-=dt;P.shield=Math.max(0,P.shield-dt);P.triple=Math.max(0,P.triple-dt);P.inv=Math.max(0,P.inv-dt);
+ if(firing&&P.cd<=0){P.cd=P.inBoat?.12:.17;const spr=P.triple>0?[-.18,0,.18]:[0];const dm=P.inBoat?40:34;
+  spr.forEach(s=>{const a=P.ang+s;PB.push({x:P.x+Math.cos(a)*22,y:P.y+Math.sin(a)*22,vx:Math.cos(a)*660,vy:Math.sin(a)*660,l:0,dmg:dm})});SFX.shoot()}
+ const bs=boardState();if(bs!==G.ctxB){G.ctxB=bs;const b=$('#board');b.style.display=bs&&G.state==='play'?'flex':'none';b.textContent=bs==='board'?'🚤 SUBIR (E)':'⬆️ BAJAR (E)'}
+ // balas del jugador y aliados
+ for(let i=PB.length-1;i>=0;i--){const b=PB[i];b.x+=b.vx*dt;b.y+=b.vy*dt;b.l+=dt;let dead=b.l>.85||b.x<0||b.y<0||b.x>WS||b.y>WS;
+  if(!dead&&inRect(b.x,b.y)){dead=true;burst(b.x,b.y,['#bae6fd','#fff'],4,80,2)}
+  if(!dead)for(const c of W.barr){if(c.hp>0&&Math.hypot(b.x-c.x,b.y-c.y)<c.r){dead=true;burst(b.x,b.y,['#f97316','#fde047'],6,120,3);dmgBarr(c,20);break}}
+  if(!dead)for(const e of targets()){if(Math.hypot(b.x-e.x,b.y-e.y)<e.r+4){dead=true;SFX.hit();burst(b.x,b.y,e.isBoat?['#e0f2fe','#7dd3fc']:['#7dd3fc','#e0f2fe'],6,120,2.5);hitTarget(e,b.dmg||34);break}}
+  if(!dead&&!b.ally)for(const c of CV){if(c.state==='saved')continue;if(Math.hypot(b.x-c.x,b.y-c.y)<c.r+3){dead=true;c.flee=3;c.state='flee';G.score=Math.max(0,G.score-200);SFX.bad();ftext(c.x,c.y,'¡Cuidado con los civiles! −200','#fca5a5');say('¡Cuidado! Hay civiles en la línea de fuego.');break}}
+  if(dead)PB.splice(i,1)}
+ // pandilleros a pie
+ for(let i=EN.length-1;i>=0;i--){const e=EN[i];e.flash=Math.max(0,e.flash-dt);
+  if(e.cap){e.cap+=dt;if(e.cap>1.4)EN.splice(i,1);continue}
+  let tg=P,td=Math.hypot(P.x-e.x,P.y-e.y);for(const a of AL){if(a.hp<=0||a.leave)continue;const q=Math.hypot(a.x-e.x,a.y-e.y);if(q<td){td=q;tg=a}}
+  const dx=tg.x-e.x,dy=tg.y-e.y,d=td||1;e.ang=Math.atan2(dy,dx);
+  let vx=0,vy=0,atkPrison=false;
+  if(e.wt>0){e.wt-=dt;vx=e.wx;vy=e.wy}
+  else if(L.defend&&W.prison&&!e.boss&&d>260){const pr=W.prison,nx=cl(e.x,pr.x,pr.x+pr.w),ny=cl(e.y,pr.y,pr.y+pr.h),qd=Math.hypot(nx-e.x,ny-e.y);
+   if(qd>e.r+24){vx=(nx-e.x)/qd;vy=(ny-e.y)/qd;e.ang=Math.atan2(vy,vx)}else{atkPrison=true;e.ang=Math.atan2(ny-e.y,nx-e.x);pr.hp-=5*D.edmg*dt;if(Math.random()<dt*3)burst(nx,ny,['#f97316','#fde047','#9ca3af'],5,90,3);if(Math.random()<dt*.6)SFX.eshoot()}}
+  else if(d<620){const want=e.fast?0:e.boss?200:230;if(d>want){vx=dx/d;vy=dy/d}else if(!e.fast){const s=Math.sin(G.t*1.3+i)>0?1:-1;vx=-dy/d*s*.7;vy=dx/d*s*.7}}
+  else if(Math.random()<dt*.5){const a=rand(0,6.28);e.wx=Math.cos(a);e.wy=Math.sin(a);e.wt=1.5}
+  const moved=moveEnt(e,vx*e.sp*dt,vy*e.sp*dt);
+  if((vx||vy)&&moved===0){e.stuck+=dt;if(e.stuck>.4){const a=rand(0,6.28);e.wx=Math.cos(a);e.wy=Math.sin(a);e.wt=.8;e.stuck=0}}else e.stuck=0;
+  e.cd-=dt;e.mcd-=dt;if(atkPrison)continue;
+  if(e.fast){if(d<e.r+tg.r+4&&e.mcd<=0){e.mcd=1;tg===P?hurt(12):hurtAlly(tg,12)}}
+  else if(d<480&&e.cd<=0){if(e.boss)bossAttack(e);else{eFire(e,e.ang+rand(-.12,.12),270,[0],20);SFX.eshoot();e.cd=rand(1.3,2.3)*D.ecd}}}
+ // lanchas enemigas
+ for(let i=BT.length-1;i>=0;i--){const b=BT[i];b.flash=Math.max(0,b.flash-dt);
+  if(b.cap){b.sink+=dt;if(Math.random()<dt*10)FXP.push({x:b.x+rand(-20,20),y:b.y+rand(-10,10),vx:0,vy:-20,l:0,m:1,c:'rgba(100,100,110,.5)',s:rand(6,10)});if(b.sink>1.6)BT.splice(i,1);continue}
+  let gx=b.x,gy=b.y;
+  if(b.state==='in'){gx=b.tx;gy=W.seaY+60;if(Math.hypot(gx-b.x,gy-b.y)<34){b.state='fight';
+   for(let k=0;k<2;k++){const lp=landPointNear(b.x+(k?30:-30),b.y,170);if(lp){spawnEnemyAt(lp.x,lp.y,false);burst(lp.x,lp.y,['#e0f2fe'],10,80,4)}}ftext(b.x,b.y,'¡Desembarco!','#fca5a5')}}
+  else{gx=cl(P.x+Math.sin(G.t*.5+i*2)*240,80,WS-80);gy=W.seaY+(b.boss?280:170)+Math.sin(G.t*.8+i)*50}
+  const dx=gx-b.x,dy=gy-b.y,d=Math.hypot(dx,dy);
+  if(d>4){const sp=Math.min(b.sp*dt,d);if(!boatBlocked(b.x+dx/d*sp,b.y,b.r))b.x+=dx/d*sp;if(!boatBlocked(b.x,b.y+dy/d*sp,b.r))b.y+=dy/d*sp;b.hd=angLerp(b.hd,Math.atan2(dy,dx),dt*3);if(Math.random()<dt*18)wake(b.x,b.y,b.hd)}
+  let tg=P,td=Math.hypot(P.x-b.x,P.y-b.y);for(const a of AL){if(a.hp<=0||a.leave)continue;const q=Math.hypot(a.x-b.x,a.y-b.y);if(q<td){td=q;tg=a}}
+  b.ang=Math.atan2(tg.y-b.y,tg.x-b.x);b.cd-=dt;
+  if(td<(b.boss?560:500)&&b.cd<=0){if(b.boss)bossAttack(b);else{eFire(b,b.ang+rand(-.1,.1),280,[-.08,.08],26);SFX.eshoot();b.cd=rand(1,1.8)*D.ecd}}}
+ // balas enemigas
+ for(let i=EB.length-1;i>=0;i--){const b=EB[i];b.x+=b.vx*dt;b.y+=b.vy*dt;b.l+=dt;let dead=b.l>2.2||inRect(b.x,b.y);
+  if(!dead&&Math.hypot(b.x-P.x,b.y-P.y)<(P.inBoat?22:P.r+3)){dead=true;hurt(9)}
+  if(!dead)for(const a of AL){if(a.hp>0&&!a.leave&&Math.hypot(b.x-a.x,b.y-a.y)<a.r+3){dead=true;hurtAlly(a,9);break}}
+  if(dead)EB.splice(i,1)}
+ // civiles
+ for(const c of CV){c.t-=dt;
+  if(c.state==='saved'){c.sv+=dt;continue}
+  if(c.state==='flee'){c.flee-=dt;const a=Math.atan2(c.y-P.y,c.x-P.x);moveEnt(c,Math.cos(a)*150*dt,Math.sin(a)*150*dt);c.ang=a;if(c.flee<=0)c.state='idle'}
+  else{if(c.t<=0){c.t=rand(1,3);const a=rand(0,6.28),m=Math.random()<.4?0:rand(20,45);c.vx=Math.cos(a)*m;c.vy=Math.sin(a)*m;if(m)c.ang=a}moveEnt(c,c.vx*dt,c.vy*dt);
+   if(!P.inBoat&&Math.hypot(c.x-P.x,c.y-P.y)<c.r+P.r+6)rescueCiv(c)}}
+ for(let i=CV.length-1;i>=0;i--)if(CV[i].state==='saved'&&CV[i].sv>1.2)CV.splice(i,1);
+ if(L.res&&CV.filter(c=>c.state!=='saved').length<3&&G.res<L.res){const p=roadPoint(500);CV.push(mkCiv(p.x,p.y))}
+ // presos (decoración)
+ for(const m of W.inmates){m.t-=dt;if(m.t<=0){m.t=rand(1,3);const a=rand(0,6.28),v=Math.random()<.4?0:rand(15,30);m.vx=Math.cos(a)*v;m.vy=Math.sin(a)*v;if(v)m.a=a}m.x=cl(m.x+m.vx*dt,830,970);m.y=cl(m.y+m.vy*dt,840,1110)}
+ // recogibles
+ G.pickT-=dt;if(G.pickT<=0){G.pickT=rand(9,14);const p=roadPoint(250);PK.push({x:p.x,y:p.y,k:pick(['med','med','shield','triple','aid'])})}
+ for(let i=PK.length-1;i>=0;i--){const k=PK[i];if(!P.inBoat&&Math.hypot(k.x-P.x,k.y-P.y)<P.r+16){SFX.pickup();
+  if(k.k==='med'){P.hp=Math.min(100,P.hp+35);ftext(k.x,k.y,'+35 salud','#86efac')}
+  if(k.k==='shield'){P.shield=7;ftext(k.x,k.y,'¡Escudo activado!','#7dd3fc');say('Escudo activado.')}
+  if(k.k==='triple'){P.triple=9;ftext(k.x,k.y,'¡Disparo triple!','#fde047');say('Disparo triple.')}
+  if(k.k==='aid'){G.score+=100;ftext(k.x,k.y,'Ayuda humanitaria +100','#f9a8d4')}
+  PK.splice(i,1)}}
+ // objetivos y aparición de enemigos
+ if(L.defend&&G.bossSpawned!==null)G.defT=Math.min(L.defend,G.defT+dt);
+ const leadDone=G.bossSpawned&&G.boss&&G.boss.cap;
+ const done=G.cap>=L.cap&&G.res>=L.res&&G.boatsDown>=L.boats&&(!L.defend||G.defT>=L.defend)&&leadDone;
+ const alive=EN.filter(e=>!e.cap&&!e.boss).length;
+ G.spawnT-=dt;if(!done&&G.spawnT<=0&&alive<L.max){G.spawnT=rand(1.2,2.6)*(W.sea?1.3:1);spawnEnemy()}
+ if(W.sea&&G.boatsDown<L.boats){G.boatT-=dt;const ab=BT.filter(b=>!b.cap&&!b.boss).length;if(G.boatT<=0&&ab<2+(G.diff>=2?1:0)){G.boatT=rand(9,15);spawnBoat(false);
+  if(!G.seaSaid){G.seaSaid=true;SFX.alarm();banner('🌊 ¡Ataque por mar!','rgba(2,132,199,.92)');say('¡Ataque por mar! Lanchas enemigas se acercan. Suba a la lancha del muelle o pida la patrulla marítima.',true)}}}
+ if(!G.bossSpawned){const ready=L.defend?G.defT>=L.defend*.5:(G.cap>=L.cap&&G.boatsDown>=L.boats);
+  if(ready){G.bossSpawned=true;G.boss=L.lead[2]?spawnBoat(true):spawnEnemy(true);SFX.alarm();banner(`⚠️ ¡Apareció ${L.lead[1]} ${L.lead[0]}!`,'rgba(185,28,28,.92)');say(`¡Atención! El líder de la banda, ${L.lead[0]}, ha aparecido. ¡Neutralícelo!`,true);Snd.intense=true}}
+ if(W.prison&&L.defend){const pr=W.prison;const f=pr.hp/pr.max;if(f<.5&&G.prSaid<1){G.prSaid=1;say('¡La cárcel está bajo ataque! Los muros resisten a la mitad.',true)}if(f<.25&&G.prSaid<2){G.prSaid=2;SFX.alarm();say('¡Los muros están a punto de caer!',true)}if(pr.hp<=0){pr.hp=0;gameOver('prison');return}}
+ updSupport(dt);
+ // efectos
+ for(let i=FXP.length-1;i>=0;i--){const p=FXP[i];p.l+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.92;p.vy*=.92;if(p.l>p.m)FXP.splice(i,1)}
+ for(let i=TX.length-1;i>=0;i--){TX[i].l+=dt;if(TX[i].l>1.6)TX.splice(i,1)}
+ for(const c of W.barr)if(c.hp>0&&Math.random()<dt*14)FXP.push({x:c.x+rand(-14,14),y:c.y+rand(-10,10),vx:rand(-8,8),vy:rand(-70,-40),l:0,m:rand(.4,.8),c:pick(['#f97316','#fde047','#ef4444']),s:rand(3,6),fire:1});
+ G.shake=Math.max(0,G.shake-dt);
+ updHud();
+ if(done)levelDone();
+}
+
+/* ================= REFUERZOS ================= */
+function reinOk(k){return G.rcd[k]<=0&&!(REIN[k].coast&&!W.sea)}
+function spawnAlly(k,i){const r=REIN[k];
+ if(r.boat){let x=cl(P.x+rand(-200,200),100,WS-100),y=W.seaY+120+i*60;AL.push({k,boat:true,x,y,r:20,hp:r.hp,max:r.hp,dmg:r.dmg,rate:r.rate,sp:260,t:r.dur,slot:i*3.1,cd:rand(0,.5),ang:0,hd:0,tag:'POLICÍA',leave:false,lv:0});burst(x,y,['#e0f2fe','#fff'],16,120,5);return}
+ const rad=r.tank?26:15;let x=P.x,y=P.y;for(let j=0;j<60;j++){const a=rand(0,6.28),R2=rand(60,150);if(!blocked(P.x+Math.cos(a)*R2,P.y+Math.sin(a)*R2,rad)){x=P.x+Math.cos(a)*R2;y=P.y+Math.sin(a)*R2;break}}
+ if(r.tank){AL.push({k,tank:true,x,y,r:26,hp:r.hp,max:r.hp,dmg:r.dmg,rate:r.rate,sp:120,t:r.dur,slot:rand(0,6),cd:.5,mg:0,ang:0,hd:0,tag:'COLOMBIA',leave:false,lv:0});burst(x,y,['#a8a29e','#78716c','#e7e5e4'],26,160,7);SFX.engine();return}
+ AL.push({k,x,y,r:15,hp:r.hp,max:r.hp,dmg:r.dmg,rate:r.rate,sp:215,col:r.col,helm:r.helm,tag:r.tag,t:r.dur,slot:i/r.count*6.28+rand(0,1),cd:rand(0,.5),ang:0,sk:pick(SKIN),leave:false,lv:0});
+ burst(x,y,['#cbd5e1','#94a3b8','#e2e8f0'],18,140,6)}
+function callHeli(kind){const a=rand(0,6.28);HE.push({kind,x:P.x+Math.cos(a)*800,y:P.y+Math.sin(a)*800,ang:a+Math.PI,t:REIN[kind==='atk'?'hatk':'hres'].dur,orb:rand(0,6.28),fire:0,rk:1.5,phase:'in',tgt:null,hold:0,saved:0,rot:0})}
+function callShip(){const left=P.x>WS/2;HE.push({kind:'ship',x:left?-150:WS+150,y:Math.min(WS-70,W.seaY+340),ang:left?0:Math.PI,t:REIN.ship.dur,fire:2,tur:0,phase:'in'})}
+function callRein(k){const r=REIN[k];if(!reinOk(k))return;G.rcd[k]=r.cd*D.cd;closeModal();G.state='play';SFX.radio();say(r.say,true);banner(`${r.icon} ${r.short} en camino`,'rgba(21,128,61,.92)');
+ if(r.heli)callHeli(r.heli);else if(r.ship)callShip();else if(r.tank)spawnAlly(k,0);else for(let i=0;i<r.count;i++)spawnAlly(k,i)}
+function openRadio(){if(G.state!=='play')return;G.state='radio';firing=false;joy=null;fb.classList.remove('on');SFX.radio();
+ modal(`<h2>📻 Pedir refuerzos</h2><div class="note">El juego queda en pausa mientras usas la radio.</div><div class="rgrid">${Object.entries(REIN).map(([k,r],i)=>{const c=G.rcd[k],sea=r.coast&&!W.sea;return `<button class="rc" data-k="${k}" ${c>0||sea?'disabled':''}><div class="i">${r.icon}</div><b>${r.short}</b><small>${r.desc}</small><div class="s" style="color:${c>0||sea?'#fca5a5':'#86efac'}">${sea?'🌊 Solo en misiones costeras':c>0?'⏳ '+Math.ceil(c)+' s':'✅ Listo'}</div></button>`}).join('')}</div><button class="btn b2" id="rx">Cerrar</button>`);
+ document.querySelectorAll('.rc').forEach(b=>b.onclick=()=>callRein(b.dataset.k));$('#rx').onclick=()=>{closeModal();G.state='play'}}
+function allyShoot(a,t){a.ang=Math.atan2(t.y-a.y,t.x-a.x);a.cd-=0;if(a.cd<=0){a.cd=a.rate*rand(.8,1.2);const an=a.ang+rand(-.06,.06);PB.push({x:a.x+Math.cos(an)*22,y:a.y+Math.sin(an)*22,vx:Math.cos(an)*640,vy:Math.sin(an)*640,l:0,dmg:a.dmg,ally:true});SFX.ashoot()}}
+function updSupport(dt){
+ for(const k in G.rcd)G.rcd[k]=Math.max(0,G.rcd[k]-dt);
+ for(let i=AL.length-1;i>=0;i--){const a=AL[i];
+  if(a.leave){a.lv+=dt;if(a.lv>1)AL.splice(i,1);continue}
+  a.t-=dt;if(a.t<=0||a.hp<=0){a.leave=true;burst(a.x,a.y,['#94a3b8','#e2e8f0'],14,120,4);ftext(a.x,a.y,a.hp<=0?'Herido, evacuado':'Misión cumplida','#93c5fd');continue}
+  a.cd-=dt;
+  if(a.boat){let t=null,bd=540;for(const q of BT){if(q.cap)continue;const dd=Math.hypot(q.x-a.x,q.y-a.y);if(dd<bd){bd=dd;t=q}}
+   if(!t)t=nearestEnemy(400,false,a);
+   let gx,gy;if(t&&t.isBoat){const an=Math.atan2(a.y-t.y,a.x-t.x)+.6;gx=t.x+Math.cos(an)*190;gy=t.y+Math.sin(an)*190}else{gx=cl(P.x+Math.cos(a.slot+G.t*.3)*220,80,WS-80);gy=W.seaY+150+Math.sin(a.slot+G.t*.4)*60}
+   gy=Math.max(gy,W.seaY+50);const dx=gx-a.x,dy=gy-a.y,d=Math.hypot(dx,dy);
+   if(d>10){moveEnt(a,dx/d*a.sp*dt,dy/d*a.sp*dt,boatBlocked,20);a.hd=angLerp(a.hd,Math.atan2(dy,dx),dt*4);if(Math.random()<dt*15)wake(a.x,a.y,a.hd)}
+   if(t)allyShoot(a,t);continue}
+  const range=a.tank?540:440;let t=null,bd=range;for(const e of targets()){const d=Math.hypot(e.x-a.x,e.y-a.y);if(d<bd&&los(a,e)){bd=d;t=e}}
+  if(Math.hypot(P.x-a.x,P.y-a.y)>650&&!P.inBoat){const lp=landPointNear(P.x,P.y,140);if(lp){a.x=lp.x;a.y=lp.y}}
+  const R=a.tank?120:85,gx=P.x+Math.cos(a.slot+G.t*.25)*R,gy=P.y+Math.sin(a.slot+G.t*.25)*R,dx=gx-a.x,dy=gy-a.y,d=Math.hypot(dx,dy);
+  if(d>25&&!(P.inBoat&&blocked(gx,gy,a.r))){moveEnt(a,dx/d*a.sp*dt,dy/d*a.sp*dt);if(a.tank){a.hd=angLerp(a.hd,Math.atan2(dy,dx),dt*3);if(Math.random()<dt*10)FXP.push({x:a.x+rand(-20,20),y:a.y+rand(-20,20),vx:0,vy:0,l:0,m:.6,c:'rgba(120,110,90,.4)',s:5})}}
+  if(a.tank){if(t){a.ang=angLerp(a.ang,Math.atan2(t.y-a.y,t.x-a.x),dt*5);
+    if(a.cd<=0){a.cd=a.rate;const an=a.ang;RK.push({x0:a.x+Math.cos(an)*40,y0:a.y+Math.sin(an)*40,x:a.x,y:a.y,tx:t.x,ty:t.y,t:0,dur:.3,rad:70,dmg:a.dmg,shell:true});SFX.cannon();G.shake=.15;burst(a.x+Math.cos(an)*44,a.y+Math.sin(an)*44,['#fde047','#f97316','#d6d3d1'],14,160,5)}
+    a.mg-=dt;if(a.mg<=0){a.mg=.22;const an=a.ang+rand(-.08,.08);PB.push({x:a.x+Math.cos(an)*30,y:a.y+Math.sin(an)*30,vx:Math.cos(an)*640,vy:Math.sin(an)*640,l:0,dmg:16,ally:true})}}
+   else a.ang=angLerp(a.ang,a.hd,dt*2);continue}
+  if(t)allyShoot(a,t);else if(d>25)a.ang=Math.atan2(dy,dx)}
+ for(let i=HE.length-1;i>=0;i--){const h=HE[i];let gx=P.x,gy=P.y;
+  if(h.kind==='ship'){h.t-=dt;if(h.phase==='out'){gx=h.ex;gy=h.y}else{gx=cl(P.x,260,WS-260);gy=h.y}
+   const dx=gx-h.x;if(Math.abs(dx)>3){h.x+=Math.sign(dx)*Math.min(Math.abs(dx),110*dt);h.ang=dx>0?0:Math.PI;if(Math.random()<dt*20)wake(h.x-Math.cos(h.ang)*80,h.y,h.ang)}
+   if(h.phase!=='out'){let tg=null,bd=900;for(const q of BT){if(q.cap)continue;const dd=Math.hypot(q.x-h.x,q.y-h.y);if(dd<bd){bd=dd;tg=q}}if(!tg)tg=nearestEnemy(760,false,h);
+    if(tg){h.tur=angLerp(h.tur,Math.atan2(tg.y-h.y,tg.x-h.x),dt*4);h.fire-=dt;if(h.fire<=0){h.fire=1.4;const bx=h.x+Math.cos(h.ang)*55,by=h.y;RK.push({x0:bx,y0:by,x:bx,y:by,tx:tg.x+rand(-10,10),ty:tg.y+rand(-10,10),t:0,dur:.6,rad:95,dmg:130,shell:true});SFX.cannon();burst(bx+Math.cos(h.tur)*30,by+Math.sin(h.tur)*30,['#fde047','#d6d3d1'],12,150,5)}}
+    if(h.t<=0){h.phase='out';h.ex=h.x<WS/2?-260:WS+260;ftext(h.x,h.y,'El buque se retira','#93c5fd')}}
+   else if(Math.abs(h.x-h.ex)<5)HE.splice(i,1);continue}
+  h.rot+=dt*28;
+  if(h.phase==='out'){gx=h.ex;gy=h.ey}
+  else if(h.kind==='atk'){h.t-=dt;h.orb+=dt*.8;gx=P.x+Math.cos(h.orb)*170;gy=P.y+Math.sin(h.orb)*170;
+   h.fire-=dt;if(h.fire<=0){const e=nearestEnemy(420,false,h);if(e){h.fire=.2;hitTarget(e,20);LN.push({x1:h.x,y1:h.y,x2:e.x+rand(-6,6),y2:e.y+rand(-6,6),l:0});burst(e.x,e.y,['#fde047','#fff'],4,90,2);SFX.mg()}else h.fire=.3}
+   h.rk-=dt;if(h.rk<=0){h.rk=2;let tg=W.barr.filter(c=>c.hp>0&&Math.hypot(c.x-h.x,c.y-h.y)<450).sort((a,b)=>Math.hypot(a.x-h.x,a.y-h.y)-Math.hypot(b.x-h.x,b.y-h.y))[0]||nearestEnemy(420,false,h);
+    if(tg){RK.push({x0:h.x,y0:h.y,x:h.x,y:h.y,tx:tg.x,ty:tg.y,t:0,dur:.55,rad:80,dmg:90});SFX.rocket()}}
+   if(h.t<=0){h.phase='out';const a=rand(0,6.28);h.ex=P.x+Math.cos(a)*1000;h.ey=P.y+Math.sin(a)*1000;ftext(h.x,h.y,'Helicóptero se retira','#93c5fd')}}
+  else{h.t-=dt;
+   if(h.phase==='in'){gx=P.x+30;gy=P.y-30;if(Math.hypot(gx-h.x,gy-h.y)<25){h.phase='heal';h.hold=1.2}}
+   else if(h.phase==='heal'){gx=P.x+30;gy=P.y-30;h.hold-=dt;if(h.hold<=0){P.hp=100;ftext(P.x,P.y,'¡Salud restaurada! ❤️','#86efac');burst(P.x,P.y,['#86efac','#f9a8d4'],20,120,3);SFX.rescue();G.lowSaid=false;h.phase='seek';h.hold=0}}
+   else if(h.phase==='seek'){if(!h.tgt||h.tgt.state==='saved'){h.tgt=null;let bd=1e9;for(const c of CV){if(c.state==='saved')continue;const dd=Math.hypot(c.x-h.x,c.y-h.y);if(dd<bd){bd=dd;h.tgt=c}}}
+    if(!h.tgt||h.saved>=3||h.t<=0){h.phase='out';const a=rand(0,6.28);h.ex=h.x+Math.cos(a)*1000;h.ey=h.y+Math.sin(a)*1000}
+    else{gx=h.tgt.x;gy=h.tgt.y-25;if(Math.hypot(gx-h.x,gy-h.y)<35){h.hold+=dt;h.tgt.vx=h.tgt.vy=0;if(h.hold>.7){rescueCiv(h.tgt,true);h.saved++;h.hold=0;h.tgt=null}}}}}
+  const dx=gx-h.x,dy=gy-h.y,d=Math.hypot(dx,dy),sp=h.kind==='atk'?300:270;
+  if(d>2){const m=Math.min(sp*dt,d);h.x+=dx/d*m;h.y+=dy/d*m;h.ang=angLerp(h.ang,Math.atan2(dy,dx),dt*4)}
+  if(h.phase==='out'&&d<30)HE.splice(i,1)}
+ for(let i=RK.length-1;i>=0;i--){const r=RK[i];r.t+=dt/r.dur;r.x=r.x0+(r.tx-r.x0)*r.t;r.y=r.y0+(r.ty-r.y0)*r.t;FXP.push({x:r.x,y:r.y,vx:rand(-10,10),vy:rand(-10,10),l:0,m:.4,c:'#cbd5e1',s:r.shell?3:4});
+  if(r.t>=1){RK.splice(i,1);SFX.boom();G.shake=Math.max(G.shake,.25);burst(r.tx,r.ty,['#fde047','#f97316','#ef4444','#6b7280'],36,230,6);
+   for(const e of targets())if(Math.hypot(e.x-r.tx,e.y-r.ty)<r.rad+e.r*.5)hitTarget(e,r.dmg);
+   for(const c of W.barr)if(Math.hypot(c.x-r.tx,c.y-r.ty)<r.rad)dmgBarr(c,80)}}
+ for(let i=LN.length-1;i>=0;i--){LN[i].l+=dt;if(LN[i].l>.08)LN.splice(i,1)}
+ if(HE.some(h=>h.kind!=='ship')){G.rotorT-=dt;if(G.rotorT<=0){G.rotorT=.09;fx(t=>noise(t,.07,.1,Snd.fx,'lowpass',260))}}
+}
+
+/* ================= DIBUJO ================= */
+const cam={x:0,y:0};let Z=1;
+function resize(){DPR=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*DPR;cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px'}
+addEventListener('resize',resize);resize();
+function person(x,y,r,shirt,skin,ang,o){
+ ctx.save();ctx.translate(x,y);
+ ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(3,5,r*.9,r*.75,0,0,7);ctx.fill();
+ ctx.rotate(ang);
+ if(o.gun){ctx.fillStyle='#111827';ctx.fillRect(r*.3,-3,r*1.25,6);ctx.fillStyle='#374151';ctx.fillRect(r*.3,-4,r*.5,8)}
+ ctx.fillStyle=shirt;ctx.beginPath();ctx.ellipse(0,0,r*.62,r,0,0,7);ctx.fill();ctx.strokeStyle='rgba(0,0,0,.45)';ctx.lineWidth=1.5;ctx.stroke();
+ if(o.vest){ctx.strokeStyle='#facc15';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,r*.5,r*.85,0,0,7);ctx.stroke()}
+ ctx.fillStyle=skin;
+ if(o.gun){ctx.beginPath();ctx.arc(r*.55,-r*.35,r*.22,0,7);ctx.arc(r*.95,r*.1,r*.22,0,7);ctx.fill()}
+ else{ctx.beginPath();ctx.arc(r*.15,-r*.75,r*.2,0,7);ctx.arc(r*.15,r*.75,r*.2,0,7);ctx.fill()}
+ ctx.beginPath();ctx.arc(0,0,r*.43,0,7);ctx.fillStyle=skin;ctx.fill();
+ if(o.helmet){ctx.fillStyle=o.helmet;ctx.beginPath();ctx.arc(-1,0,r*.46,0,7);ctx.fill();ctx.fillStyle='rgba(255,255,255,.35)';ctx.beginPath();ctx.arc(-3,-3,r*.18,0,7);ctx.fill()}
+ else if(o.bandana){ctx.fillStyle=o.bandana;ctx.beginPath();ctx.arc(-1,0,r*.45,Math.PI*.55,Math.PI*1.45);ctx.lineTo(-r*.7,r*.15);ctx.closePath();ctx.fill()}
+ else{ctx.fillStyle='#1c1917';ctx.beginPath();ctx.arc(-2,0,r*.38,Math.PI*.5,Math.PI*1.5);ctx.fill()}
+ if(o.basket){ctx.fillStyle='#a16207';ctx.beginPath();ctx.arc(0,0,r*.5,0,7);ctx.fill();ctx.fillStyle=o.basket;for(let k=0;k<4;k++){ctx.beginPath();ctx.arc(Math.cos(k*1.6)*r*.22,Math.sin(k*1.6)*r*.22,r*.17,0,7);ctx.fill()}}
+ if(o.chain){ctx.strokeStyle='#facc15';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,r*.58,-1.2,1.2);ctx.stroke()}
+ ctx.restore();
+}
+
+function drawBoat(x,y,ang,type,o){o=o||{};
+ const Lh={ship:210,boss:110,police:60,gang:54}[type],Wd={ship:54,boss:44,police:26,gang:22}[type];
+ ctx.save();ctx.translate(x+5,y+7);ctx.rotate(ang);ctx.fillStyle='rgba(0,30,60,.3)';ctx.beginPath();ctx.ellipse(0,0,Lh/2,Wd/2,0,0,7);ctx.fill();ctx.restore();
+ ctx.save();ctx.translate(x,y);ctx.rotate(ang);
+ const hull={police:'#f8fafc',gang:'#7c2d12',boss:'#111827',ship:'#64748b'}[type],deck={police:'#e2e8f0',gang:'#a16207',boss:'#374151',ship:'#94a3b8'}[type];
+ const shape=(l,w)=>{ctx.beginPath();ctx.moveTo(l/2,0);ctx.quadraticCurveTo(l/4,-w/2,0,-w/2);ctx.lineTo(-l/2,-w/2);ctx.lineTo(-l/2,w/2);ctx.lineTo(0,w/2);ctx.quadraticCurveTo(l/4,w/2,l/2,0);ctx.closePath()};
+ shape(Lh,Wd);ctx.fillStyle=hull;ctx.fill();ctx.strokeStyle='rgba(0,0,0,.55)';ctx.lineWidth=2;ctx.stroke();
+ shape(Lh*.82,Wd*.7);ctx.fillStyle=deck;ctx.fill();
+ if(type==='police'){ctx.fillStyle='#1d4ed8';ctx.fillRect(-Lh/2,-Wd/2,Lh*.62,3);ctx.fillRect(-Lh/2,Wd/2-3,Lh*.62,3);ctx.fillStyle='#0f172a';ctx.fillRect(-4,-7,12,14);const bl=Math.sin(G.t*12)>0;ctx.fillStyle=bl?'#ef4444':'#3b82f6';ctx.fillRect(-2,-9,4,4);ctx.fillStyle=bl?'#3b82f6':'#ef4444';ctx.fillRect(-2,5,4,4);ctx.fillStyle='#111';ctx.fillRect(-Lh/2-6,-5,8,10)}
+ if(type==='gang'){ctx.fillStyle='#111';ctx.fillRect(-Lh/2-7,-5,9,10);ctx.fillStyle='#dc2626';ctx.fillRect(-10,-Wd/2+2,6,Wd-4)}
+ if(type==='boss'){ctx.fillStyle='#b91c1c';ctx.fillRect(-Lh/2,-Wd/2,Lh*.7,4);ctx.fillRect(-Lh/2,Wd/2-4,Lh*.7,4);ctx.fillStyle='#1f2937';ctx.fillRect(-30,-14,34,28);ctx.fillStyle='#111';ctx.fillRect(-Lh/2-8,-8,10,16);ctx.fillStyle='#000';ctx.fillRect(-Lh/2+4,-2,2,-18);ctx.fillStyle='#dc2626';ctx.fillRect(-Lh/2+6,-20,14,9)}
+ if(type==='ship'){ctx.fillStyle='#f97316';ctx.beginPath();ctx.moveTo(40,-Wd/2);ctx.lineTo(56,-Wd/2);ctx.lineTo(36,Wd/2);ctx.lineTo(20,Wd/2);ctx.fill();ctx.fillStyle='#f8fafc';ctx.fillRect(-40,-17,56,34);ctx.fillStyle='#38bdf8';ctx.fillRect(8,-13,6,26);ctx.fillStyle='#475569';ctx.fillRect(-28,-6,10,12);
+  ctx.strokeStyle='#fde047';ctx.lineWidth=2;ctx.beginPath();ctx.arc(-80,0,15,0,7);ctx.stroke();ctx.fillStyle='#fde047';ctx.font='bold 14px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('H',-80,1)}
+ ctx.restore();
+ if(type==='ship'){const bx=x+Math.cos(ang)*58,by=y+Math.sin(ang)*58;ctx.save();ctx.translate(bx,by);ctx.rotate(o.tur||ang);ctx.fillStyle='#334155';ctx.fillRect(0,-3,30,6);ctx.beginPath();ctx.arc(0,0,11,0,7);ctx.fillStyle='#475569';ctx.fill();ctx.restore()}
+}
+function drawTank(a){ctx.save();ctx.translate(a.x+5,a.y+7);ctx.rotate(a.hd);ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(-34,-26,68,52);ctx.restore();
+ ctx.save();ctx.translate(a.x,a.y);ctx.rotate(a.hd);
+ ctx.fillStyle='#1f2937';ctx.fillRect(-34,-26,68,13);ctx.fillRect(-34,13,68,13);ctx.strokeStyle='#4b5563';ctx.lineWidth=2;const off=(G.t*40)%8;for(let i=-34+off;i<34;i+=8){ctx.beginPath();ctx.moveTo(i,-26);ctx.lineTo(i,-13);ctx.moveTo(i,13);ctx.lineTo(i,26);ctx.stroke()}
+ ctx.fillStyle='#556b2f';ctx.fillRect(-30,-15,60,30);ctx.strokeStyle='rgba(0,0,0,.5)';ctx.strokeRect(-30,-15,60,30);ctx.fillStyle='#4a5d27';ctx.fillRect(-30,-15,10,30);
+ ctx.rotate(a.ang-a.hd);ctx.fillStyle='#3f4f24';ctx.fillRect(4,-4,44,8);ctx.fillStyle='#2f3a1b';ctx.fillRect(44,-5,6,10);ctx.beginPath();ctx.arc(0,0,15,0,7);ctx.fillStyle='#6b7f3a';ctx.fill();ctx.strokeStyle='rgba(0,0,0,.5)';ctx.stroke();
+ ctx.fillStyle='#fcd116';ctx.fillRect(-10,-7,12,5);ctx.fillStyle='#003893';ctx.fillRect(-10,-2,12,3);ctx.fillStyle='#ce1126';ctx.fillRect(-10,1,12,3);
+ ctx.restore()}
+function drawHeli(h){
+ ctx.save();ctx.translate(h.x+34,h.y+46);ctx.rotate(h.ang);ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(0,0,30,13,0,0,7);ctx.fill();ctx.fillRect(-58,-3,34,6);ctx.restore();
+ ctx.save();ctx.translate(h.x,h.y);ctx.rotate(h.ang);
+ const atk=h.kind==='atk',body=atk?'#3f4f2f':'#f8fafc',dark=atk?'#273220':'#cbd5e1';
+ ctx.fillStyle=dark;ctx.fillRect(-60,-3.5,36,7);ctx.fillRect(-64,-12,6,24);
+ ctx.fillStyle=body;ctx.beginPath();ctx.ellipse(0,0,30,atk?11:14,0,0,7);ctx.fill();ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=1.5;ctx.stroke();
+ ctx.fillStyle='#38bdf8';ctx.beginPath();ctx.ellipse(18,0,10,atk?6:9,0,0,7);ctx.fill();
+ if(atk){ctx.fillStyle='#1f2937';ctx.fillRect(-6,-19,18,5);ctx.fillRect(-6,14,18,5);ctx.fillStyle='#ef4444';ctx.fillRect(8,-19,4,5);ctx.fillRect(8,14,4,5)}
+ else{ctx.fillStyle='#dc2626';ctx.fillRect(-10,-3,14,6);ctx.fillRect(-6,-7,6,14);ctx.fillStyle='#1d4ed8';ctx.fillRect(-28,-2,12,4)}
+ ctx.restore();
+ ctx.save();ctx.translate(h.x,h.y);ctx.fillStyle='rgba(30,41,59,.18)';ctx.beginPath();ctx.arc(0,0,44,0,7);ctx.fill();ctx.rotate(h.rot);ctx.strokeStyle='rgba(15,23,42,.75)';ctx.lineWidth=4;ctx.lineCap='round';
+ for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(k*1.571)*44,Math.sin(k*1.571)*44);ctx.stroke()}ctx.fillStyle='#111';ctx.beginPath();ctx.arc(0,0,4,0,7);ctx.fill();ctx.restore();
+ label(atk?'APOYO AÉREO':'RESCATE',h.x,h.y-50,atk?'#fde047':'#fca5a5')}
+function label(t,x,y,c,sz){ctx.font=`bold ${sz||10}px system-ui`;ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.8)';ctx.strokeText(t,x,y);ctx.fillStyle=c;ctx.fillText(t,x,y)}
+function hpBar(x,y,w,f,c){ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(x-w/2,y,w,4);ctx.fillStyle=c;ctx.fillRect(x-w/2,y,w*cl(f,0,1),4)}
+function draw(){
+ ctx.setTransform(DPR,0,0,DPR,0,0);
+ const SW=innerWidth,SH=innerHeight;Z=Math.min(SW,SH)<600?.8:1;const w=SW/Z,h=SH/Z;
+ if(!W){const g=ctx.createLinearGradient(0,0,0,SH);g.addColorStop(0,'#0c4a6e');g.addColorStop(1,'#1e1b4b');ctx.fillStyle=g;ctx.fillRect(0,0,SW,SH);return}
+ const L=curL();
+ cam.x=cl(P.x-w/2,0,WS-w);cam.y=cl(P.y-h/2,0,WS-h);
+ const sk=G.shake>0?G.shake*14:0;
+ ctx.fillStyle='#0f172a';ctx.fillRect(0,0,SW,SH);
+ ctx.save();ctx.scale(Z,Z);ctx.translate(-cam.x+rand(-sk,sk),-cam.y+rand(-sk,sk));
+ const vx0=cam.x-80,vy0=cam.y-80,vx1=cam.x+w+80,vy1=cam.y+h+80;
+ const vis=r=>r.x+r.w>vx0&&r.x<vx1&&r.y+r.h>vy0&&r.y<vy1;
+ ctx.fillStyle=L.g;ctx.fillRect(0,0,WS,WS);
+ W.parks.forEach(p=>{if(!vis(p))return;ctx.fillStyle=p.base?'#86efac':'#4ade80';ctx.fillRect(p.x,p.y,p.w,p.h);if(p.base){ctx.fillStyle='rgba(30,64,175,.35)';ctx.fillRect(p.x+30,p.y+30,p.w-60,p.h-60);ctx.fillStyle='#fff';ctx.font='bold 16px system-ui';ctx.textAlign='center';ctx.fillText('BASE',p.x+p.w/2,p.y+p.h/2-6);ctx.font='26px sans-serif';ctx.fillText('🇭🇹',p.x+p.w/2,p.y+p.h/2+26)}});
+ W.plazas.forEach(p=>{if(!vis(p))return;ctx.fillStyle='#e7d3a8';ctx.fillRect(p.x,p.y,p.w,p.h);ctx.strokeStyle='rgba(0,0,0,.07)';for(let i=0;i<p.w;i+=20){ctx.beginPath();ctx.moveTo(p.x+i,p.y);ctx.lineTo(p.x+i,p.y+p.h);ctx.stroke()}});
+ ctx.fillStyle='#4b5563';for(let k=0;k<=6;k++){ctx.fillRect(k*BK-RD/2,0,RD,WS);ctx.fillRect(0,k*BK-RD/2,WS,RD)}
+ ctx.fillStyle='#9ca3af';for(let k=0;k<=6;k++){ctx.fillRect(k*BK-RD/2-4,0,4,WS);ctx.fillRect(k*BK+RD/2,0,4,WS);ctx.fillRect(0,k*BK-RD/2-4,WS,4);ctx.fillRect(0,k*BK+RD/2,WS,4)}
+ ctx.fillStyle='#fde047';for(let k=0;k<=6;k++)for(let a=0;a<WS;a+=44){if(a%BK<RD/2+10||a%BK>BK-RD/2-10)continue;ctx.fillRect(k*BK-2,a,4,22);ctx.fillRect(a,k*BK-2,22,4)}
+ // mar
+ if(W.sea){const sy=W.seaY;ctx.fillStyle='#f2d9a0';ctx.fillRect(0,1248,WS,sy-1248);
+  const g=ctx.createLinearGradient(0,sy,0,WS);g.addColorStop(0,'#22d3ee');g.addColorStop(.25,'#0284c7');g.addColorStop(1,'#0c4a6e');ctx.fillStyle=g;ctx.fillRect(0,sy,WS,WS-sy);
+  ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=3;ctx.beginPath();for(let x=Math.max(0,vx0);x<=Math.min(WS,vx1);x+=12){const yy=sy+2+Math.sin(x*.05+G.t*2)*3;x===Math.max(0,vx0)?ctx.moveTo(x,yy):ctx.lineTo(x,yy)}ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=2;for(let y=sy+30;y<WS;y+=34){if(y<vy0||y>vy1)continue;ctx.beginPath();for(let x=Math.max(0,vx0);x<=Math.min(WS,vx1);x+=16){const yy=y+Math.sin(x*.03+G.t*1.5+y)*4;x===Math.max(0,vx0)?ctx.moveTo(x,yy):ctx.lineTo(x,yy)}ctx.stroke()}
+  W.piers.forEach(p=>{ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(p.x+6,p.y+8,p.w,p.h);ctx.fillStyle='#92400e';ctx.fillRect(p.x,p.y,p.w,p.h);ctx.strokeStyle='#78350f';ctx.lineWidth=1.5;for(let y=p.y;y<p.y+p.h;y+=9){ctx.beginPath();ctx.moveTo(p.x,y);ctx.lineTo(p.x+p.w,y);ctx.stroke()}ctx.fillStyle='#451a03';for(let y=p.y+20;y<p.y+p.h;y+=60){ctx.beginPath();ctx.arc(p.x-2,y,4,0,7);ctx.arc(p.x+p.w+2,y,4,0,7);ctx.fill()}});
+  label('MUELLE',W.piers[0].x+22,W.piers[0].y+40,'#fde68a',11)}
+ // cárcel
+ if(W.prison){const p=W.prison;ctx.fillStyle='#a8a29e';ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='#d6d3d1';ctx.fillRect(p.x+18,p.y+18,p.w-36,p.h-36);
+  ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=2;ctx.strokeRect(840,1040,120,70);ctx.beginPath();ctx.moveTo(900,1040);ctx.lineTo(900,1110);ctx.stroke();
+  W.cells.forEach(c=>{ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(c.x+7,c.y+8,c.w,c.h);ctx.fillStyle='#78716c';ctx.fillRect(c.x,c.y,c.w,c.h);ctx.fillStyle='#c2410c';ctx.fillRect(c.x+5,c.y+5,c.w-10,c.h-10);ctx.strokeStyle='rgba(0,0,0,.3)';for(let i=c.x+12;i<c.x+c.w-6;i+=14){ctx.beginPath();ctx.moveTo(i,c.y+5);ctx.lineTo(i,c.y+c.h-5);ctx.stroke()}});
+  W.rects.filter(r=>r.wall).forEach(r=>{ctx.fillStyle='#374151';ctx.fillRect(r.x,r.y,r.w,r.h);ctx.strokeStyle='#d1d5db';ctx.lineWidth=1.2;ctx.beginPath();if(r.w>r.h){for(let x=r.x;x<r.x+r.w;x+=8)ctx.lineTo(x,r.y+r.h/2+((x/8)%2?-4:4))}else{for(let y=r.y;y<r.y+r.h;y+=8)ctx.lineTo(r.x+r.w/2+((y/8)%2?-4:4),y)}ctx.stroke()});
+  ctx.strokeStyle='#6b7280';ctx.lineWidth=3;for(let x=860;x<945;x+=10){ctx.beginPath();ctx.moveTo(x,p.y+p.h-18);ctx.lineTo(x,p.y+p.h);ctx.stroke()}
+  [[p.x,p.y],[p.x+p.w,p.y],[p.x,p.y+p.h],[p.x+p.w,p.y+p.h]].forEach(([tx,ty],i)=>{const a=G.t*.8+i*1.6;ctx.fillStyle='rgba(253,224,71,.16)';ctx.beginPath();ctx.moveTo(tx,ty);ctx.arc(tx,ty,170,a-.25,a+.25);ctx.closePath();ctx.fill();ctx.fillStyle='#1f2937';ctx.beginPath();ctx.arc(tx,ty,22,0,7);ctx.fill();ctx.fillStyle='#991b1b';ctx.beginPath();ctx.arc(tx,ty,14,0,7);ctx.fill()});
+  label('PENITENCIARÍA',p.x+p.w/2,p.y+12,'#fff',13);
+  if(L.defend){hpBar(p.x+p.w/2,p.y-22,300,p.hp/p.max,p.hp/p.max>.5?'#22c55e':p.hp/p.max>.25?'#f59e0b':'#ef4444');label('MUROS DE LA CÁRCEL',p.x+p.w/2,p.y-28,'#fff',12)}}
+ ctx.fillStyle='rgba(0,0,0,.28)';W.houses.forEach(b=>{if(vis(b))ctx.fillRect(b.x+7,b.y+8,b.w,b.h)});
+ W.houses.forEach(b=>{if(!vis(b))return;ctx.fillStyle=b.c;ctx.fillRect(b.x,b.y,b.w,b.h);ctx.fillStyle=b.roof;ctx.fillRect(b.x+5,b.y+5,b.w-10,b.h-10);
+  ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=1.5;for(let i=b.x+10;i<b.x+b.w-6;i+=7){ctx.beginPath();ctx.moveTo(i,b.y+5);ctx.lineTo(i,b.y+b.h-5);ctx.stroke()}
+  ctx.strokeStyle='rgba(0,0,0,.4)';ctx.lineWidth=2;ctx.strokeRect(b.x,b.y,b.w,b.h);
+  if(b.tank){ctx.fillStyle='#111827';ctx.beginPath();ctx.arc(b.x+b.w-18,b.y+18,9,0,7);ctx.fill();ctx.fillStyle='#374151';ctx.beginPath();ctx.arc(b.x+b.w-18,b.y+18,5,0,7);ctx.fill()}});
+ W.stalls.forEach(s=>{if(!vis(s))return;ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(s.x+5,s.y+6,s.w,s.h);for(let i=0;i<6;i++){ctx.fillStyle=i%2?s.c:s.c2;ctx.fillRect(s.x+i*s.w/6,s.y,s.w/6,s.h)}ctx.strokeStyle='rgba(0,0,0,.35)';ctx.strokeRect(s.x,s.y,s.w,s.h)});
+ W.taps.forEach(t=>{if(!vis(t))return;ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(t.x+5,t.y+6,t.w,t.h);ctx.fillStyle=t.c;ctx.fillRect(t.x,t.y,t.w,t.h);ctx.fillStyle=t.c2;
+  if(t.hor){for(let i=0;i<3;i++)ctx.fillRect(t.x+10+i*20,t.y+4,10,t.h-8);ctx.fillStyle='#7dd3fc';ctx.fillRect(t.x+t.w-12,t.y+4,8,t.h-8)}
+  else{for(let i=0;i<3;i++)ctx.fillRect(t.x+4,t.y+10+i*20,t.w-8,10);ctx.fillStyle='#7dd3fc';ctx.fillRect(t.x+4,t.y+t.h-12,t.w-8,8)}
+  ctx.strokeStyle='#111';ctx.lineWidth=2;ctx.strokeRect(t.x,t.y,t.w,t.h)});
+ W.barr.forEach(c=>{if(c.hp<=0){ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,7);ctx.fill();return}
+  for(let k=0;k<6;k++){const a=k/6*6.28;ctx.fillStyle='#111827';ctx.beginPath();ctx.arc(c.x+Math.cos(a)*13,c.y+Math.sin(a)*13,10,0,7);ctx.fill();ctx.fillStyle='#374151';ctx.beginPath();ctx.arc(c.x+Math.cos(a)*13,c.y+Math.sin(a)*13,4,0,7);ctx.fill()}
+  hpBar(c.x,c.y+c.r+4,40,c.hp/70,'#f97316')});
+ PK.forEach(k=>{const b=Math.sin(G.t*4+k.x)*3;const col={med:'#22c55e',shield:'#38bdf8',triple:'#facc15',aid:'#ec4899'}[k.k];
+  ctx.fillStyle=col+'55';ctx.beginPath();ctx.arc(k.x,k.y+b,18+Math.sin(G.t*6)*2,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(k.x,k.y+b,13,0,7);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=3;ctx.stroke();
+  ctx.font='15px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText({med:'⛑️',shield:'🛡️',triple:'⚡',aid:'📦'}[k.k],k.x,k.y+b+1)});
+ // barcos
+ HE.forEach(h=>{if(h.kind==='ship'){drawBoat(h.x,h.y,h.ang,'ship',{tur:h.tur});label('GUARDIA COSTERA',h.x,h.y-36,'#fdba74',11)}});
+ BT.forEach(b=>{ctx.globalAlpha=b.cap?Math.max(0,1-b.sink/1.6):1;const sc=b.cap?1-b.sink*.3:1;ctx.save();ctx.translate(b.x,b.y);ctx.scale(sc,sc);ctx.translate(-b.x,-b.y);
+  drawBoat(b.x,b.y,b.hd,b.boss?'boss':'gang');if(!b.cap){person(b.x+Math.cos(b.hd)*6,b.y+Math.sin(b.hd)*6,b.boss?16:11,b.flash>0?'#fff':'#1f2937',b.sk,b.ang,{gun:true,bandana:b.boss?curL().lead[3]:'#dc2626',chain:b.boss})}
+  ctx.restore();ctx.globalAlpha=1;
+  if(!b.cap){if(b.boss)label(`${b.icon} ${b.name.toUpperCase()}`,b.x,b.y-b.r-14,'#fde047',12);else if(b.hp<b.max)hpBar(b.x,b.y-b.r-8,36,b.hp/b.max,'#ef4444')}});
+ if(PBOAT&&!P.inBoat){drawBoat(PBOAT.x,PBOAT.y,PBOAT.ang,'police');label('🚤 PATRULLA',PBOAT.x,PBOAT.y-22,'#7dd3fc',10)}
+ AL.forEach(a=>{if(!a.boat)return;ctx.globalAlpha=a.leave?Math.max(0,1-a.lv):1;drawBoat(a.x,a.y,a.hd,'police');person(a.x,a.y,11,'#1e3a8a','#6b4429',a.ang,{gun:true,helmet:'#2563eb'});label('POLICÍA',a.x,a.y-24,'#bfdbfe',9);hpBar(a.x,a.y-20,28,a.hp/a.max,'#22c55e');ctx.globalAlpha=1});
+ // civiles
+ CV.forEach(c=>{if(c.state==='saved'){ctx.globalAlpha=Math.max(0,1-c.sv/1.2)}
+  person(c.x,c.y,c.kid?9:12,c.sh,c.sk,c.ang,{basket:c.basket});
+  if(c.state!=='saved'){ctx.font='bold 11px system-ui';ctx.textAlign='center';ctx.fillText(c.state==='flee'?'😨':'🙋',c.x,c.y-20)}
+  ctx.globalAlpha=1});
+ W.inmates.forEach(m=>person(m.x,m.y,11,'#f97316',m.sk,m.a,{}));
+ // pandilleros
+ EN.forEach(e=>{if(e.cap){ctx.globalAlpha=Math.max(0,1-e.cap/1.4)}
+  if(e.fast&&!e.cap){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.ang);ctx.fillStyle='#111';ctx.fillRect(-22,-5,44,10);ctx.fillStyle='#dc2626';ctx.fillRect(-10,-7,22,14);ctx.fillStyle='#111';ctx.beginPath();ctx.arc(-20,0,6,0,7);ctx.arc(20,0,6,0,7);ctx.fill();ctx.restore()}
+  if(e.boss&&!e.cap){ctx.fillStyle='rgba(239,68,68,.22)';ctx.beginPath();ctx.arc(e.x,e.y,e.r+12+Math.sin(G.t*6)*3,0,7);ctx.fill()}
+  person(e.x,e.y,e.r,e.flash>0?'#fff':e.sh,e.sk,e.ang,{gun:!e.cap&&!e.fast,bandana:e.band,chain:e.boss});
+  if(e.cap){ctx.font='18px "Apple Color Emoji","Segoe UI Emoji",sans-serif';ctx.textAlign='center';ctx.fillText('🔗',e.x,e.y-e.r-10)}
+  else if(e.boss)label(`${e.icon} ${e.name.toUpperCase()}`,e.x,e.y-e.r-12,'#fde047',12);
+  else if(e.hp<e.max)hpBar(e.x,e.y-e.r-10,32,e.hp/e.max,'#ef4444');
+  ctx.globalAlpha=1});
+ // aliados
+ AL.forEach(a=>{if(a.boat)return;ctx.globalAlpha=a.leave?Math.max(0,1-a.lv):1;
+  if(a.tank){drawTank(a);label('🇨🇴 COLOMBIA',a.x,a.y-34,'#fde047',10);hpBar(a.x,a.y-30,44,a.hp/a.max,'#22c55e')}
+  else{ctx.fillStyle='rgba(34,197,94,.18)';ctx.beginPath();ctx.arc(a.x,a.y,a.r+9,0,7);ctx.fill();person(a.x,a.y,a.r,a.col,a.sk,a.ang,{gun:true,helmet:a.helm,vest:a.k==='gsf'});label(a.tag,a.x,a.y-a.r-12,'#bbf7d0',9);hpBar(a.x,a.y-a.r-8,28,a.hp/a.max,'#22c55e')}
+  ctx.globalAlpha=1});
+ // jugador
+ if(P.inBoat){drawBoat(P.x,P.y,P.bang,'police');if(P.shield>0){ctx.strokeStyle='rgba(56,189,248,.7)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(P.x,P.y,38,0,7);ctx.stroke()}person(P.x,P.y,13,'#1e3a8a','#6b4429',P.ang,{gun:true,helmet:'#2563eb',vest:true})}
+ else{if(P.shield>0){ctx.strokeStyle=`rgba(56,189,248,${.5+Math.sin(G.t*10)*.3})`;ctx.lineWidth=3;ctx.beginPath();ctx.arc(P.x,P.y,P.r+10,0,7);ctx.stroke();ctx.fillStyle='rgba(56,189,248,.15)';ctx.fill()}
+  ctx.fillStyle='rgba(59,130,246,.25)';ctx.beginPath();ctx.arc(P.x,P.y,P.r+16,0,7);ctx.fill();
+  ctx.globalAlpha=P.inv>0?.6:1;person(P.x,P.y,P.r,'#1e3a8a','#6b4429',P.ang,{gun:true,helmet:'#2563eb',vest:true});ctx.globalAlpha=1}
+ PB.forEach(b=>{ctx.strokeStyle=b.ally?'rgba(253,224,71,.55)':'rgba(125,211,252,.5)';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-b.vx*.03,b.y-b.vy*.03);ctx.stroke();ctx.fillStyle='#e0f2fe';ctx.beginPath();ctx.arc(b.x,b.y,4,0,7);ctx.fill()});
+ EB.forEach(b=>{ctx.fillStyle='rgba(249,115,22,.4)';ctx.beginPath();ctx.arc(b.x,b.y,8,0,7);ctx.fill();ctx.fillStyle='#fdba74';ctx.beginPath();ctx.arc(b.x,b.y,4,0,7);ctx.fill()});
+ FXP.forEach(p=>{ctx.globalAlpha=1-p.l/p.m;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.s*(p.fire?1-p.l/p.m*.5:1),0,7);ctx.fill()});ctx.globalAlpha=1;
+ TX.forEach(t=>{ctx.globalAlpha=1-t.l/1.6;label(t.t,t.x,t.y-28-t.l*34,t.c,15);});ctx.globalAlpha=1;
+ W.palms.forEach(p=>{if(p.x<vx0||p.x>vx1||p.y<vy0||p.y>vy1)return;ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.arc(p.x+8,p.y+10,p.s,0,7);ctx.fill();
+  for(let k=0;k<7;k++){const a=p.a+k/7*6.28+Math.sin(G.t+p.x)*.05;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(a);ctx.fillStyle=k%2?'#15803d':'#22c55e';ctx.beginPath();ctx.ellipse(p.s*.55,0,p.s*.6,p.s*.2,0,0,7);ctx.fill();ctx.restore()}
+  ctx.fillStyle='#854d0e';ctx.beginPath();ctx.arc(p.x,p.y,4,0,7);ctx.fill()});
+ LN.forEach(l=>{ctx.strokeStyle='rgba(253,224,71,.9)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(l.x1,l.y1);ctx.lineTo(l.x2,l.y2);ctx.stroke()});
+ RK.forEach(r=>{ctx.fillStyle=r.shell?'#fde047':'#f97316';ctx.beginPath();ctx.arc(r.x,r.y,r.shell?4:5,0,7);ctx.fill()});
+ HE.forEach(h=>{if(h.kind!=='ship')drawHeli(h)});
+ ctx.restore();
+ // joystick
+ if(joy){ctx.fillStyle='rgba(255,255,255,.12)';ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(joy.bx,joy.by,55,0,7);ctx.fill();ctx.stroke();
+  const dx=joy.x-joy.bx,dy=joy.y-joy.by,d=Math.hypot(dx,dy),k=d>55?55/d:1;ctx.fillStyle='rgba(255,255,255,.55)';ctx.beginPath();ctx.arc(joy.bx+dx*k,joy.by+dy*k,24,0,7);ctx.fill()}
+ // flecha al objetivo
+ let tg=null,tc='#ef4444';
+ if(G.boss&&!G.boss.cap){tg=G.boss;tc='#facc15'}
+ else if(G.res<L.res){tg=nearestCiv();tc='#22c55e'}
+ if(!tg&&W.sea&&G.boatsDown<L.boats){let bd=1e9;for(const b of BT){if(b.cap)continue;const d=Math.hypot(b.x-P.x,b.y-P.y);if(d<bd){bd=d;tg=b}}tc='#38bdf8'}
+ if(!tg){tg=nearestEnemy(9999);tc='#ef4444'}
+ if(!tg&&W.sea&&!P.inBoat&&G.boatsDown<L.boats){tg=PBOAT;tc='#7dd3fc'}
+ if(tg){const sx=(tg.x-cam.x)*Z,sy=(tg.y-cam.y)*Z;if(sx<0||sy<0||sx>SW||sy>SH){const a=Math.atan2(tg.y-P.y,tg.x-P.x),R=Math.min(SW,SH)*.36;const ax=SW/2+Math.cos(a)*R,ay=SH/2+Math.sin(a)*R;
+  ctx.save();ctx.translate(ax,ay);ctx.rotate(a);ctx.fillStyle=tc;ctx.globalAlpha=.6+Math.sin(G.t*6)*.3;ctx.beginPath();ctx.moveTo(16,0);ctx.lineTo(-8,-10);ctx.lineTo(-8,10);ctx.closePath();ctx.fill();ctx.restore()}}
+ // minimapa
+ const mm=Math.min(110,SW*.26),mx=SW-mm-10,my=$('#hud').offsetHeight+14,k=mm/WS;
+ ctx.fillStyle='rgba(8,20,36,.8)';ctx.fillRect(mx-3,my-3,mm+6,mm+6);ctx.fillStyle='#a8a29e';ctx.fillRect(mx,my,mm,mm);
+ ctx.fillStyle='#4b5563';for(let i=0;i<=6;i++){ctx.fillRect(mx+(i*BK-RD/2)*k,my,RD*k,mm);ctx.fillRect(mx,my+(i*BK-RD/2)*k,mm,RD*k)}
+ if(W.sea){ctx.fillStyle='#0284c7';ctx.fillRect(mx,my+W.seaY*k,mm,mm-W.seaY*k);ctx.fillStyle='#92400e';W.piers.forEach(p=>ctx.fillRect(mx+p.x*k,my+p.y*k,Math.max(2,p.w*k),p.h*k))}
+ if(W.prison){const p=W.prison;ctx.fillStyle='#374151';ctx.fillRect(mx+p.x*k,my+p.y*k,p.w*k,p.h*k);ctx.fillStyle='#f97316';ctx.fillRect(mx+(p.x+p.w/2)*k-3,my+(p.y+p.h/2)*k-3,6,6)}
+ CV.forEach(c=>{if(c.state!=='saved'){ctx.fillStyle='#22c55e';ctx.fillRect(mx+c.x*k-2,my+c.y*k-2,4,4)}});
+ EN.forEach(e=>{if(!e.cap){ctx.fillStyle=e.boss?'#facc15':'#ef4444';ctx.beginPath();ctx.arc(mx+e.x*k,my+e.y*k,e.boss?4:2.5,0,7);ctx.fill()}});
+ BT.forEach(b=>{if(!b.cap){ctx.fillStyle=b.boss?'#facc15':'#f43f5e';ctx.fillRect(mx+b.x*k-3,my+b.y*k-2,6,4)}});
+ AL.forEach(a=>{ctx.fillStyle='#4ade80';ctx.beginPath();ctx.arc(mx+a.x*k,my+a.y*k,a.tank?3.5:2.5,0,7);ctx.fill()});HE.forEach(h=>{ctx.fillStyle=h.kind==='atk'?'#fde047':h.kind==='ship'?'#e2e8f0':'#f9a8d4';ctx.fillRect(mx+h.x*k-3,my+h.y*k-3,6,6)});
+ if(PBOAT&&!P.inBoat){ctx.fillStyle='#7dd3fc';ctx.fillRect(mx+PBOAT.x*k-3,my+PBOAT.y*k-2,6,4)}
+ ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(mx+P.x*k,my+P.y*k,3.5,0,7);ctx.fill();ctx.strokeStyle='#2563eb';ctx.lineWidth=2;ctx.stroke();
+ if(G.boss&&!G.boss.cap){const bw=Math.min(300,SW-24),by=my+mm+16;ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(12,by,bw,14);ctx.fillStyle='#dc2626';ctx.fillRect(12,by,bw*G.boss.hp/G.boss.max,14);ctx.fillStyle='#fff';ctx.font='bold 12px system-ui';ctx.textAlign='left';ctx.fillText(`${G.boss.icon} ${G.boss.name.toUpperCase()} — LÍDER`,14,by-5)}
+}
+function nearestCiv(){let b=null,bd=1e9;for(const c of CV){if(c.state==='saved')continue;const d=Math.hypot(c.x-P.x,c.y-P.y);if(d<bd){bd=d;b=c}}return b}
+function updHud(force){const L=curL();$('#hLvl').textContent=`${D.icon} ${G.lvl+1}. ${L.n}`;$('#hHp').style.width=P.hp+'%';
+ const o=[];if(L.cap)o.push(`🔗 ${Math.min(G.cap,L.cap)}/${L.cap}`);if(L.res)o.push(`🤝 ${Math.min(G.res,L.res)}/${L.res}`);if(L.boats)o.push(`🚤 ${Math.min(G.boatsDown,L.boats)}/${L.boats}`);
+ if(L.defend)o.push(`⏱️ ${Math.ceil(L.defend-G.defT)}s`);if(W.prison&&L.defend)o.push(`🏛️ ${Math.max(0,Math.ceil(W.prison.hp/W.prison.max*100))}%`);
+ o.push(`${L.lead[1]} ${G.boss&&G.boss.cap?'✅':G.bossSpawned?'⚠️':'—'}`);
+ const s=o.join(' · ');if(force||updHud.s!==s){updHud.s=s;$('#hObj').innerHTML=`<b>${s}</b>`}
+ $('#hSc').textContent=G.score;
+ const rn=Object.keys(REIN).filter(k=>reinOk(k)).length;if(force||updHud.rn!==rn){updHud.rn=rn;$('#rbN').textContent=rn;$('#rbN').style.display=rn?'flex':'none'}}
+
+/* ================= BUCLE ================= */
+let last=performance.now();
+function loop(now){const dt=Math.min(.04,(now-last)/1000);last=now;G.t+=dt;if(G.state==='play')update(dt);draw();requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+
+/* ================= PANTALLAS ================= */
+function modal(h){$('#modal').innerHTML=`<div class="modal"><div class="card">${h}</div></div>`}
+function closeModal(){$('#modal').innerHTML=''}
+function showPlayUI(on){$('#hud').style.display=on?'flex':'none';$('#radio').style.display=on?'flex':'none';$('#fire').style.display=on&&matchMedia('(pointer:coarse)').matches?'flex':'none';if(!on)$('#board').style.display='none';G.ctxB='x'}
+const stars=n=>'★'.repeat(n)+'☆'.repeat(5-n);
+function menu(){
+ G.state='menu';showPlayUI(false);
+ const nx=Math.min(unlocked,LEVELS.length)-1;
+ modal(`<div class="big">🇭🇹</div><h1>Operación Amanecer</h1><div style="font-weight:800;color:#fbbf24">Edición de acción · 20 misiones</div><div class="flag"></div>
+ <p>Eres agente de la Policía Nacional. Captura pandilleros, <b>neutraliza al líder de cada banda</b>, defiende las cárceles, combate en tierra y mar y <b>pide refuerzos por radio</b>.</p>
+ <button class="btn" id="cont">▶ ${unlocked>1?'Continuar':'Empezar'}: Misión ${nx+1}</button>
+ <h3>1. Elige tu rango de dificultad</h3>
+ <div class="dgrid">${DIFFS.map((d,i)=>`<button class="dc ${i===G.diff?'sel':''}" data-d="${i}"><b>${d.icon} ${d.n}</b><small>Rango: ${d.rank}<br>${d.desc}<br>Puntos ×${d.score}</small></button>`).join('')}</div>
+ <h3>2. Misiones (🏙️ ciudad · 🌊 costa · 🔒 cárcel)</h3>
+ ${LEVELS.map((L,i)=>`<button class="mi" data-m="${i}" ${i>=unlocked?'disabled':''}><span style="font-size:20px">${i<unlocked?TICON[L.t]:'🔒'}</span><span><b>${i+1}. ${L.n}</b><small>${i<unlocked?L.sub:'Completa la misión anterior para desbloquearla.'}</small><span class="ld">Líder: ${L.lead[1]} ${L.lead[0]}</span></span><span class="stars">${stars(L.st)}</span></button>`).join('')}
+ <div id="instBox"></div>
+ <button class="btn b2" id="how" style="margin-top:10px">❔ Cómo jugar</button>
+ <p class="note">Juego de ficción. Los personajes, líderes, bandas y sucesos son inventados. Tu arma es un aturdidor: los pandilleros quedan detenidos 🔗 y van a la cárcel.</p>`);
+ document.querySelectorAll('.dc').forEach(b=>b.onclick=()=>{audioInit();G.diff=+b.dataset.d;D=DIFFS[G.diff];SFX.pickup();menu()});
+ document.querySelectorAll('.mi').forEach(b=>b.onclick=()=>{audioInit();G.lvl=+b.dataset.m;G.score=0;brief()});
+ $('#cont').onclick=()=>{audioInit();G.lvl=nx;G.score=0;brief()};
+ $('#how').onclick=howTo;
+ renderInstall();
+}
+/* ===== INSTALACIÓN (app descargable) ===== */
+let deferredPrompt=null;
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent);
+function renderInstall(){const box=$('#instBox');if(!box)return;
+ if(isStandalone()){box.innerHTML='<p class="note">✅ Juego instalado. Funciona sin internet.</p>';return}
+ if(deferredPrompt){box.innerHTML='<button class="btn" id="inst" style="background:linear-gradient(#22c55e,#15803d);color:#fff">📲 Descargar e instalar el juego</button><p class="note">Se instala en tu teléfono y funciona sin internet.</p>';
+  $('#inst').onclick=async()=>{deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null;renderInstall()};return}
+ if(isIOS()){box.innerHTML='<p class="note">📲 Para instalarlo en iPhone: toca <b>Compartir</b> ⬆️ y luego <b>Añadir a pantalla de inicio</b>.</p>';return}
+ box.innerHTML='<p class="note">📲 Para instalarlo: abre el menú del navegador (⋮) y elige <b>Instalar app</b> o <b>Añadir a pantalla de inicio</b>.</p>'}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;renderInstall()});
+addEventListener('appinstalled',()=>{deferredPrompt=null;renderInstall();say('¡Juego instalado!',true)});
+if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+function howTo(){
+ modal(`<h2>❔ Cómo jugar</h2><ul>
+ <li>📱 <b>Móvil:</b> arrastra el dedo para moverte y mantén pulsado <b>🎯 DISPARAR</b> (apunta solo).</li>
+ <li>💻 <b>Computadora:</b> WASD o flechas para moverte, ratón para apuntar, clic o espacio para disparar. <b>R</b> abre la radio, <b>1–9</b> piden refuerzos, <b>E</b> sube o baja de la lancha.</li>
+ <li>🎯 <b>Cada misión tiene un líder de banda.</b> Aparece cuando cumples los otros objetivos (o a mitad de la defensa de una cárcel). Neutralízalo para ganar.</li>
+ <li>🌊 <b>Misiones costeras:</b> las bandas atacan por mar. Ve al muelle y pulsa <b>🚤 SUBIR</b> para manejar la lancha de la patrulla marítima.</li>
+ <li>🔒 <b>Misiones de cárcel:</b> protege los muros hasta que acabe el tiempo. Todos los pandilleros capturados van a la cárcel.</li>
+ <li>📻 <b>Refuerzos:</b> 🛡️ GSF · 🕶️ Seguridad privada · 🇺🇸 Unidad EE. UU. · 🇸🇻 Unidad El Salvador · 🇨🇴 Tanques de Colombia · 🚤 Patrulla marítima · 🚢 Buque de la Guardia Costera · 🚁 Helicóptero de ataque · 🚑 Helicóptero de rescate.</li>
+ <li>🙋 Toca a los civiles para rescatarlos. ¡No les dispares!</li>
+ <li>★ Las estrellas indican la dificultad de cada misión (1 a 5). Tu rango multiplica los puntos.</li></ul>
+ <button class="btn" id="bk">Volver</button>`);$('#bk').onclick=menu}
+function brief(){
+ G.state='brief';showPlayUI(false);const L=curL();
+ const ob=[];if(L.cap)ob.push(`🔗 Capturar ${L.cap}`);if(L.res)ob.push(`🤝 Rescatar ${L.res}`);if(L.boats)ob.push(`🚤 Hundir ${L.boats} lanchas`);if(L.defend)ob.push(`🔒 Defender la cárcel ${L.defend} s`);ob.push(`${L.lead[1]} Neutralizar a ${L.lead[0]}`);
+ modal(`<div style="color:#93c5fd;font-weight:700">MISIÓN ${G.lvl+1} DE ${LEVELS.length} · <span style="color:#fbbf24">${stars(L.st)}</span></div><div class="note">${TICON[L.t]} ${{city:'Ciudad',coast:'Costa',prison:'Cárcel'}[L.t]} · ${D.icon} ${D.n} · Rango ${D.rank}</div><h2>📍 ${L.n}</h2><p>${L.sub}</p>
+ <div>${ob.map(x=>`<span class="obj">${x}</span>`).join('')}</div>
+ <p class="note" style="margin-top:8px">📻 Pulsa REFUERZOS para pedir ayuda por radio.${L.t==='coast'?' En la costa también tienes patrulla marítima y buque de la Guardia Costera.':''}</p>
+ <button class="btn" id="go" style="margin-top:6px">¡En marcha!</button> <button class="btn b2" id="mn">Menú</button>`);
+ say(L.b,true);
+ $('#mn').onclick=menu;
+ $('#go').onclick=()=>{audioInit();closeModal();startLevel();G.lvlStart=G.score;G.state='play';showPlayUI(true);$('#hint').style.display=matchMedia('(pointer:coarse)').matches?'block':'none';banner(`📍 ${L.n}`)};
+}
+function levelDone(){
+ G.state='done';showPlayUI(false);firing=false;joy=null;SFX.win();const L=curL();
+ const bonus=Math.max(0,Math.round(600-G.lvlTime*3)),hb=Math.round(P.hp*5);G.score+=bonus+hb;
+ const dBonus=Math.round((G.score-(G.lvlStart||0))*(D.score-1));G.score+=dBonus;
+ unlocked=Math.max(unlocked,Math.min(LEVELS.length,G.lvl+2));try{localStorage.setItem('oa_unlock20',unlocked)}catch(e){}
+ if(G.lvl===LEVELS.length-1){say('¡Victoria total! Los veinte líderes de las bandas están en la cárcel. Haití vuelve a tener paz.',true);
+  modal(`<div class="big">🏆</div><h1>¡Haití en paz!</h1><p>Completaste las 20 misiones y neutralizaste a los 20 líderes de las bandas. Las familias regresan a sus casas, los mercados se llenan y los niños vuelven a la escuela.</p><p>🔒 Pandilleros enviados a la cárcel: <b>${G.prisoners}</b><br>Rango: <b>${D.icon} ${D.rank}</b></p><div class="big" style="font-size:30px">⭐ ${G.score}</div><button class="btn" id="go">Menú principal</button>`);
+  $('#go').onclick=menu;return}
+ say(`¡Misión cumplida! ${L.lead[0]} está en la cárcel.`,true);
+ modal(`<div class="big">✅</div><h2>¡Misión cumplida!</h2><p>${L.n} está libre y <b>${L.lead[1]} ${L.lead[0]}</b> va camino a la cárcel.</p><ul><li>Bonificación por tiempo: <b>+${bonus}</b></li><li>Bonificación por salud: <b>+${hb}</b></li><li>Dificultad ${D.n} (×${D.score}): <b>${dBonus>=0?'+':''}${dBonus}</b></li><li>🔒 Total en la cárcel: <b>${G.prisoners}</b></li></ul><div class="big" style="font-size:28px">⭐ ${G.score}</div><button class="btn" id="go">Siguiente misión ▶</button><button class="btn b2" id="mn">Menú</button>`);
+ $('#go').onclick=()=>{G.lvl++;brief()};$('#mn').onclick=menu;
+}
+function gameOver(why){
+ G.state='over';showPlayUI(false);firing=false;joy=null;SFX.lose();
+ const prison=why==='prison';say(prison?'Los muros de la cárcel han caído. Los presos escapan. ¡Inténtelo de nuevo!':'Agente herido. La misión ha fallado. ¡Inténtelo de nuevo!',true);
+ modal(`<div class="big">${prison?'🧱':'🚑'}</div><h2>${prison?'¡La cárcel cayó!':'Agente evacuado'}</h2><p>${prison?'Las bandas derribaron los muros y los presos escaparon.':'Has sido herido y el equipo médico te ha retirado de '+LEVELS[G.lvl].n+'.'}</p><div class="big" style="font-size:26px">⭐ ${G.score}</div><button class="btn" id="go">🔄 Reintentar misión</button><button class="btn b2" id="mn">Menú</button>`);
+ $('#go').onclick=()=>{G.score=Math.max(0,G.score-300);brief()};$('#mn').onclick=menu;
+}
+function togglePause(){
+ if(G.state==='play'){G.state='pause';firing=false;joy=null;modal(`<div class="big">⏸️</div><h2>Pausa</h2><button class="btn" id="go">▶ Continuar</button><button class="btn b2" id="mn">Menú</button>`);$('#go').onclick=togglePause;$('#mn').onclick=menu}
+ else if(G.state==='pause'){closeModal();G.state='play'}
+}
+$('#bPause').onclick=togglePause;
+$('#radio').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();audioInit();openRadio()});
+$('#bMus').onclick=()=>{audioInit();Snd.musicOn=!Snd.musicOn;$('#bMus').classList.toggle('off',!Snd.musicOn)};
+$('#bFx').onclick=()=>{audioInit();Snd.fxOn=!Snd.fxOn;$('#bFx').classList.toggle('off',!Snd.fxOn);if(!Snd.fxOn&&'speechSynthesis' in window)speechSynthesis.cancel()};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&G.state==='play')togglePause()});
+menu();
+
+</script>
+</body>
+</html>
